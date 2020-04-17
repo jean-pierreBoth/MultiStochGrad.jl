@@ -50,33 +50,34 @@ end
 
 A structure grouping observations and an evaluation function
 
-    We will make this structure a function lile object
 
 """
 mutable struct TermFunction{F<:Function}
     eval :: F
     observations :: Observations
+    function TermFunction(eval : F, observations : Observations)
+        # check signature
+        dist = eval(observations, observations.datas[1], 1)
+        @assert abs(dist - observations.value_at_data[1]) < 1.E-10 "incoherent function"
+        new(eval, observations)
+    end
 end
 
 
-
+"""
 
 """
-A functor transforming a structure in a function 
 
-
-so that something declared as : 
-        ``f = TermFunction(myfonction, observations)``  
- becomes a function we can call as f(position, term) and execute
- myfonction
-We now are sure the aval function passed as field eval in a TermFunction
-struct has the right signature  
-
-see Function like objects in Julia manual v1.4
-
-"""
-function (term_f::TermFunction)(position :: Vector{Float64}, term :: UInt)
-    return term_f.eval(term_f.observations, position, term)
+mutable struct TermGradient{F<:Function}
+    eval :: F
+    observations :: Observations
+    function TermFunction(eval : F, observations : Observations)
+        # check signature
+        direction = rand(length(observations.datas[1]))
+        dist = eval(observations, observations.datas[1], direction)
+        # find an assertion
+        new(eval, observations)
+    end
 end
 
 #####################################################################
@@ -94,7 +95,6 @@ end
 
 mutable struct SgdPb
     #  A vector of observation , associated value
-    observations :: Observations
-    partial_value :: Function
-    partial_gradient :: Function
+    partial_value :: TermFunction
+    partial_gradient :: TermGradient
 end
