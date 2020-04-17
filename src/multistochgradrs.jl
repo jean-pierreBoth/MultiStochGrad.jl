@@ -31,7 +31,7 @@ function setRustlibPath(path::String)
 end
 
 
-
+# a pointer to ObservationsPtr  will be in fact a pointer to FFiObservations
 mutable struct ObservationsPtr
 end
 
