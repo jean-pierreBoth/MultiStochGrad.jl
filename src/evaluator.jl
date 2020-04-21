@@ -26,6 +26,16 @@ end
 
 A structure grouping observations and an evaluation function
 
+The evaluation function must have signature
+    (observations: Observations, position: Vector{Float64}, term : Int64) -> Float64
+
+## Args:
+
+-  position : is position we want the function value at. So it is a vector
+    of the same dimension as datas vector in observations.
+
+- term : the rank of term in sum representing objective function
+
 ## Fields
 
 """
@@ -63,6 +73,12 @@ function compute_value(tf :: TermFunction, position :: Vector{Float64}, terms::V
     value = sum(values)/nbterm
     value
 end
+
+
+function get_nbterms(tf :: Evaluator)
+    length(tf.observations)
+end
+
 
 
 """
@@ -167,4 +183,14 @@ end
 
 function compute_gradient!(evaluator::Evaluator, position : Vector{Float64}, terms::Vector{Float64}, gradient)
     evaluator.compute_term_gradient.compute_gradient!(evaluator.compute_term_gradient.observations, position, terms, gradient)
+end
+
+
+function compute_value(evaluator::Evaluator, position : Vector{Float64})
+    evaluator.compute_term_value.compute_value(evaluator.compute_term_value.observations, position)
+end
+
+
+function get_nbterms(evaluator::Evaluator)
+    length(evaluator.compute_term_gradient.observations)
 end
