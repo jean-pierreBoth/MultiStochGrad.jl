@@ -16,7 +16,7 @@ mutable struct SCSG
     eta_zero :: Float64
     # fraction of nbterms to consider in initialization of mⱼ governing evolution of nb small iterations
     m_zero :: Float64
-    # m_0 in the paper
+    # b_0 in the paper
     mini_batch_size_init :: Int64
     # related to B_0 in Paper. Fraction of terms to consider in initialisation of B_0
     large_batch_size_init :: Float64
@@ -27,7 +27,7 @@ end
 """
 # struct BatchSizeInfo
 
-stores all parameters describing batch characteristis
+stores all parameters describing batch characteristics
 
 
 """
@@ -87,7 +87,7 @@ The growing factor alfa should be such that :
        B_0 * alfa^(2nbiterations) < nbterms
 
 """
-function getgrowingfactor(scsg_pb::SCSG, nbiterations::Int64, nbterms::Int64)
+function get_batchgrowingfactor(scsg_pb::SCSG, nbiterations::Int64, nbterms::Int64)
     if scsg_pb.m_zero > nbterms
         error("m_zero > nbterms in function to minimize, exiting")
     end
@@ -102,13 +102,66 @@ end
 
 
 """
-# function minimize(scsg_pb::SCSG, evaluation::Evaluator, initial_position::Vector{Float64})
+
+"""
+
+function get_nbminibatch(batch_info::BatchSizeInfo)
+    m_j =  batch_info.nb_mini_batch_parameter
+    b_j = batch_info.mini_batch_size
+    # we return mean of geometric. Sampling too much instable due to large variance of geometric distribution.
+    # ensure that it is at least 1 with ceil
+    n_j = ceil(Int64, b_j/m_j)
+    n_j = min(n_j, batch_info.large_batch_size) 
+    @debug " nb mini batch = " n_j
+    n_j
+end
+
+"""
+# function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iter :: Int64, initial_position::Vector{Float64})
 
 ## Args
 - scsg_pb : the structure describing main parameters of the batch strategy
-- scsg_pb : constains the structure containing observations and evaluations function
+- max_iter : maximum number of iterations
 - initial_position : initial position of the iterations
+
 """
 
-function minimize(scsg_pb::SCSG, evaluation::Evaluator, initial_position::Vector{Float64})
+function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_position::Vector{Float64})
+    direction = zeros(Float64, length(position))
+    large_batch_gradient = zeros(Float64, length(position))
+    mini_batch_gradient_current = zeros(Float64, length(position))
+    mini_batch_gradient_origin = zeros(Float64, length(position))
+    nbterms = get_nbterms(evaluation)
+    batch_growing_factor = get_batchgrowingfactor(scsg_pb, max_iterations, evaluation)
+    #
+    position = Vector{Float64}(initial_position)
+    iteration = 0
+    more = true
+    while more 
+        iteration += 1
+        # get iteration parameters
+        batch_info = get_batchsizeinfo(scsg_pb, batch_growing_factor, nbterms, iteration)
+        # batch sampling
+        batch_indexes = samplewithoutreplacement(batch_info.large_batch_size, 1:nbterms)
+        # compute gradient on large batch index set and store initial position
+        compute_gradient!(evaluation.compute_term_gradient, position , batch_indexes, large_batch_gradient)
+        # sample binomial law for number Nj of small batch iterations
+        nb_mini_batch = get_nbminibatch(scsg_pb)
+        position_before_mini_batch = Vector{Float64}(position)
+        # loop on small batch iterations
+        for i in 1:nb_mini_batch
+            # sample mini batch terms
+            batch_indexes = samplewithoutreplacement(batch_info.minibatchsize, 1:nbterms)
+            compute_gradient!(evaluation.compute_term_gradient, position , batch_indexes, mini_batch_gradient_current)
+            compute_gradient!(evaluation.compute_term_gradient, position_before_mini_batch , batch_indexes, mini_batch_gradient_origin)
+            direction = mini_batch_gradient_current - mini_batch_gradient_origin + large_batch_gradient;
+            position = position - batch_info.stepsize * direction;
+        end
+        value = compute_value(evaluation, position)
+        if iteration >= max_iterations 
+            @info("Reached maximal number of iterations required , stopping optimization");
+            return position, value
+        end
+    end
+
 end
