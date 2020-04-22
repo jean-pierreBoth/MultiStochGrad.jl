@@ -8,8 +8,10 @@ using Distributed
 # Observations
 
 
-datas list of data vector
-a vector of value at each data
+## Fields
+
+- datas : list of data vector
+- value_at_data : value for each observations
 
 """
 
@@ -27,7 +29,7 @@ end
 A structure grouping observations and an evaluation function
 
 The evaluation function must have signature
-    (observations: Observations, position: Vector{Float64}, term : Int64) -> Float64
+    (observations: Observations, position: Array{Float64, N}, term : Int64) -> Float64
 
 ## Args:
 
@@ -39,14 +41,15 @@ The evaluation function must have signature
 ## Fields
 
 """
-mutable struct TermFunction{F<:Function}
+mutable struct TermFunction{N, F<:Function}
     eval :: F
     observations :: Observations
-    function TermFunction(evalf : F, observations : Observations)
+    dim :: Dims{N}
+    function TermFunction(evalf : F, observations : Observations, d::Dims{N})
         # check signature
-        dist = evalf(observations, observations.datas[1], 1)
-        @assert abs(dist - observations.value_at_data[1]) < 1.E-10 "incoherent function"
-        new(evalf, observations)
+        z = zeros(d)
+        dist = evalf(observations, observations.datas[1], z)
+        new(evalf, observations, d)
     end
 end
 
@@ -57,7 +60,7 @@ end
 This function compute value of function at a given position summing over all terms
     
 """
-function compute_value(tf :: TermFunction, position :: Vector{Float64})
+function compute_value(tf :: TermFunction, position :: Array{Float64})
     nbterm = length(tf.observations)
     # pamp with batch size = 1000
     values = pmap(i->tf.eval(tf.observations[i], position), 1:nbterm; batch_size = 1000)
@@ -66,7 +69,7 @@ function compute_value(tf :: TermFunction, position :: Vector{Float64})
 end
 
 
-function compute_value(tf :: TermFunction, position :: Vector{Float64}, terms::Vector{Int64})
+function compute_value(tf :: TermFunction, position :: Array{Float64}, terms::Vector{Int64})
     nbterm = length(tf.observations)
     # pamp with batch size = 1000. check speed versus a mapreduce
     values = pmap(i->tf.eval(tf.observations[i], position), terms; batch_size = 1000)
@@ -86,28 +89,31 @@ end
 
 This structure is is dedicated to do all gradient computations
 
-## Fiels
+## Fields
 
-- eval is a function of signature Fn(Observations, Vector{Float64}, Int64, Vector{Float64}) 
+- eval is a function of signature Fn(Observations, Array{Float64}, Int64, Array{Float64}) 
     taking as arguments : 
         . observations
         . position
         . a term rank
         . a vector for gradient to be returned in (avoid reallocations as we sum the result in loops)
+            Array for gradient has the same dimension as array for position (...)
     
 - observations : the observations of the problem
+- dims : ccharacterize the dimensions on variable for which we do a minimization
 
 """
 
-mutable struct TermGradient{F<:Function}
+mutable struct TermGradient{N, F<:Function}
     eval :: F
     observations :: Observations
-    function TermGradient(evalg : F, observations : Observations)
+    dim :: Dims{N}
+    function TermGradient(evalg : F, observations : Observations, d::Dims{N})
         # check signature
-        direction = rand(length(observations.datas[1]))
-        evalg(observations, observations.datas[1], 1, direction)
+        z = zeros(d)
+        evalg(observations, observations.datas[1], 1, z)
         # find an assertion
-        new(evalg, observations)
+        new(evalg, observations, d)
     end
 end
 
@@ -121,7 +127,7 @@ end
 
 
 
-function compute_gradient!(termg::TermGradient, position : Vector{Float64}, terms::Vector{Float64}, gradient)
+function compute_gradient!(termg::TermGradient, position : Array{Float64}, terms::Vector{Float64}, gradient::Array{Float64})
     batchsize=1000
     nbterms = length(terms)
      # split in blocks
@@ -181,12 +187,12 @@ function compute_gradient!(evaluator::Evaluator, position, term, gradient)
 end
 
 
-function compute_gradient!(evaluator::Evaluator, position : Vector{Float64}, terms::Vector{Float64}, gradient)
+function compute_gradient!(evaluator::Evaluator, position : Array{Float64}, terms::Vector{Float64}, gradient)
     evaluator.compute_term_gradient.compute_gradient!(evaluator.compute_term_gradient.observations, position, terms, gradient)
 end
 
 
-function compute_value(evaluator::Evaluator, position : Vector{Float64})
+function compute_value(evaluator::Evaluator, position : Array{Float64})
     evaluator.compute_term_value.compute_value(evaluator.compute_term_value.observations, position)
 end
 
