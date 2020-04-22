@@ -41,11 +41,11 @@ The evaluation function must have signature
 ## Fields
 
 """
-mutable struct TermFunction{N, F<:Function}
+mutable struct TermFunction{F<:Function, N}
     eval :: F
     observations :: Observations
     dim :: Dims{N}
-    function TermFunction(evalf : F, observations : Observations, d::Dims{N})
+    function TermFunction{F,N}(evalf :: F, observations :: Observations, d::Dims{N}) where {F<:Function,N}
         # check signature
         z = zeros(d)
         dist = evalf(observations, observations.datas[1], z)
@@ -104,11 +104,11 @@ This structure is is dedicated to do all gradient computations
 
 """
 
-mutable struct TermGradient{N, F<:Function}
+mutable struct TermGradient{F<:Function, N}
     eval :: F
     observations :: Observations
     dim :: Dims{N}
-    function TermGradient(evalg : F, observations : Observations, d::Dims{N})
+    function TermGradient{F,N}(evalg :: F, observations :: Observations, d::Dims{N}) where{F,N}
         # check signature
         z = zeros(d)
         evalg(observations, observations.datas[1], 1, z)
@@ -127,12 +127,12 @@ end
 
 
 
-function compute_gradient!(termg::TermGradient, position : Array{Float64}, terms::Vector{Float64}, gradient::Array{Float64})
+function compute_gradient!(termg::TermGradient, position :: Array{Float64}, terms::Vector{Float64}, gradient::Array{Float64})
     batchsize=1000
     nbterms = length(terms)
      # split in blocks
     nbblocks = nbterms % batchsize
-    nbblocks = rem(nbblocks,batchsize) > 0 nbblocks+1 : nbblocks
+    nbblocks = rem(nbblocks,batchsize) > 0  ? nbblocks+1 : nbblocks
     gradblocks = zeros(length(gradient), nbblocks)
     for i in 1::nbblocks 
         first = (i-1) * batchsize +1
@@ -182,17 +182,17 @@ end
 the function that will go in generic SCSG iterations
 
 """
-function compute_gradient!(evaluator::Evaluator, position, term, gradient)
+function compute_gradient!(evaluator::Evaluator, position :: Array{Float64}, term, gradient :: Array{Float64})
     evaluator.compute_term_gradient.eval(evaluator.compute_term_gradient.observations, position, term, gradient)
 end
 
 
-function compute_gradient!(evaluator::Evaluator, position : Array{Float64}, terms::Vector{Float64}, gradient)
+function compute_gradient!(evaluator::Evaluator, position :: Array{Float64}, terms::Vector{Float64}, gradient :: Array{Float64})
     evaluator.compute_term_gradient.compute_gradient!(evaluator.compute_term_gradient.observations, position, terms, gradient)
 end
 
 
-function compute_value(evaluator::Evaluator, position : Array{Float64})
+function compute_value(evaluator::Evaluator, position :: Array{Float64})
     evaluator.compute_term_value.compute_value(evaluator.compute_term_value.observations, position)
 end
 
