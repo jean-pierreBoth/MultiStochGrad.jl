@@ -213,8 +213,8 @@ function compute_gradient!(evaluator::Evaluator, position :: Array{Float64,1}, t
     batchsize=1000
     nbterms = length(terms)
      # split in blocks
-    nbblocks = nbterms % batchsize
-    nbblocks = rem(nbblocks,batchsize) > 0  ? nbblocks+1 : nbblocks
+    nbblocks = floor(Int64, nbterms / batchsize)
+    nbblocks = nbterms % batchsize > 0  ? nbblocks+1 : nbblocks
     @debug " nbblocks  " nbblocks
         # CAVEAT , if gradient 2d array bug.
     gradblocks = zeros(length(gradient), nbblocks)
@@ -226,11 +226,13 @@ function compute_gradient!(evaluator::Evaluator, position :: Array{Float64,1}, t
         gradtmp = zeros(Float64, length(gradient))
         for j in first:last
             termg.eval(termg.observations, position, terms[j], gradtmp)
-            gradblocks[:,i]= gradblocks[:,i] + gradtmp
+            @debug " gradtmp" gradtmp
+            gradblocks[: ,i] .= gradblocks[:,i] + gradtmp
         end
     end
-    # recall that in julia is column oriented so summing along rows is sum(,2)
-    gradient = sum(gradblocks,dims = 2)/nbterms
+    # recall that in julia is column oriented so summing along rows is sum(,dims=2)
+    copy!(gradient, sum(gradblocks,dims = 2)[:,1]/nbterms)
+    @debug "gradient sum blocks" gradient
 end
 
 

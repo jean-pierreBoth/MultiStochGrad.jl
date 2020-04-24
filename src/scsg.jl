@@ -155,6 +155,8 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_
         batch_indexes = samplewithoutreplacement(batch_info.largebatchsize, 1:nbterms)
         # compute gradient on large batch index set and store initial position
         compute_gradient!(evaluation, position , batch_indexes, large_batch_gradient)
+        @debug "large batch gradient " large_batch_gradient
+
         # sample binomial law for number Nj of small batch iterations
         nb_mini_batch = get_nbminibatch(batch_info)
         position_before_mini_batch = Vector{Float64}(position)
@@ -163,8 +165,11 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_
             # sample mini batch terms
             batch_indexes = samplewithoutreplacement(batch_info.minibatchsize, 1:nbterms)
             compute_gradient!(evaluation, position , batch_indexes, mini_batch_gradient_current)
+            @debug "mini batch gradientcurrent  " mini_batch_gradient_current
             compute_gradient!(evaluation, position_before_mini_batch , batch_indexes, mini_batch_gradient_origin)
+            @debug "mini batch gradient origin " mini_batch_gradient_origin
             direction = mini_batch_gradient_current - mini_batch_gradient_origin + large_batch_gradient;
+            @debug "step, position " batch_info.stepsize direction
             position = position - batch_info.stepsize * direction;
         end
         value = compute_value(evaluation, position)
