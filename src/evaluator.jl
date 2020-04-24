@@ -3,6 +3,9 @@
 
 using Distributed
 
+
+export Observations
+
 """
 
 # Observations
@@ -77,10 +80,6 @@ function compute_value(tf :: TermFunction, position :: Array{Float64}, terms::Ve
     value
 end
 
-
-function get_nbterms(tf :: Evaluator)
-    length(tf.observations)
-end
 
 
 

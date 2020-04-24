@@ -3,11 +3,21 @@
 using Random
 
 
+include("evaluator.jl")
+
+
 """
 
 # SCSG
 
-This is the structure for Stochastic Controlled Stochastic Gradient
+This is the structure describing parameters used in Stochastic Controlled Stochastic Gradient
+
+## Fields
+
+- eta_zero :
+- m_zero :
+- mini_batch_size_init :
+- large_batch_size_init :
 
 """
 
