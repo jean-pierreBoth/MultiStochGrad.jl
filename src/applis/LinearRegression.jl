@@ -22,7 +22,7 @@ include("/home.1/jpboth/Julia/MultiStochGrad.jl/src/evaluator.jl")
     ```
     """
 
-    function term_value(observations:: Observations, position:: Array{Float64}, term :: Int64)
+    function term_value(observations:: Observations, position:: Array{Float64,1}, term :: Int64)
         x, y = observations.datas[term], observations.value_at_data[term]
         @assert length(position) == length(x) "inequal vector length"
         0.5 * (y - dot(position, x))^2

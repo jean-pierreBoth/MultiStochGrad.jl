@@ -46,7 +46,7 @@ mutable struct BatchSizeInfo
     largebatchsize:: Int64
     minibatchsize:: Int64
     # parameter used in determining number of mini batch
-    nbminibatchparam :: Int64   
+    nbminibatchparam :: Float64   
     # step used in position update
     stepsize :: Float64
 end
@@ -55,7 +55,7 @@ end
 """
 returns a struct BatchSizeInfo for a given iteration
 """
-function get_batchsizeinfo(scsg_pb :: SCSG, batch_growing_factor :: Int64 , nbterms::Int64, iteration :: Int64)
+function get_batchsizeinfo(scsg_pb :: SCSG, batch_growing_factor :: Float64 , nbterms::Int64, iteration :: Int64)
     alfa_j = batch_growing_factor^iteration
     # max size of large batch is 100 or 0.1 * the number of terms
     max_large_batch_size = nbterms > 100 ? ceil(Int64, nbterms/10.) : nbterms
@@ -70,7 +70,7 @@ function get_batchsizeinfo(scsg_pb :: SCSG, batch_growing_factor :: Int64 , nbte
     step_size = scsg_pb.eta_zero / alfa_j
     #
     BatchSizeInfo(iteration, large_batch_size, mini_batch_size, nb_mini_batch_parameter, step_size)
-    end
+end
 
 
 # select sizeasked terms selected without replacement
@@ -137,12 +137,12 @@ end
 """
 
 function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_position::Vector{Float64})
-    direction = zeros(Float64, length(position))
-    large_batch_gradient = zeros(Float64, length(position))
-    mini_batch_gradient_current = zeros(Float64, length(position))
-    mini_batch_gradient_origin = zeros(Float64, length(position))
+    direction = zeros(Float64, length(initial_position))
+    large_batch_gradient = zeros(Float64, length(initial_position))
+    mini_batch_gradient_current = zeros(Float64, length(initial_position))
+    mini_batch_gradient_origin = zeros(Float64, length(initial_position))
     nbterms = get_nbterms(evaluation)
-    batch_growing_factor = get_batchgrowingfactor(scsg_pb, max_iterations, evaluation)
+    batch_growing_factor = get_batchgrowingfactor(scsg_pb, max_iterations, nbterms)
     #
     position = Vector{Float64}(initial_position)
     iteration = 0
@@ -152,7 +152,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_
         # get iteration parameters
         batch_info = get_batchsizeinfo(scsg_pb, batch_growing_factor, nbterms, iteration)
         # batch sampling
-        batch_indexes = samplewithoutreplacement(batch_info.large_batch_size, 1:nbterms)
+        batch_indexes = samplewithoutreplacement(batch_info.largebatchsize, 1:nbterms)
         # compute gradient on large batch index set and store initial position
         compute_gradient!(evaluation.compute_term_gradient, position , batch_indexes, large_batch_gradient)
         # sample binomial law for number Nj of small batch iterations

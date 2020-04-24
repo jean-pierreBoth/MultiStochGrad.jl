@@ -53,17 +53,20 @@ The evaluation function must have signature
 ## Fields
 
 """
-mutable struct TermFunction{F<:Function, N}
-    eval :: F
+
+
+mutable struct TermFunction
+    eval :: Function
     observations :: Observations
-    dim :: Dims{N}
-    function TermFunction{F,N}(evalf :: F, observations :: Observations, d::Dims{N}) where {F<:Function,N}
+    dim :: Dims
+    function TermFunction(evalf :: Function, observations :: Observations, d::Dims)
         # check signature
         z = zeros(d)
-        dist = evalf(observations, observations.datas[1], z)
+        dist = evalf(observations, observations.datas[1], 1)
         new(evalf, observations, d)
     end
 end
+
 
 
 """
@@ -75,7 +78,7 @@ This function compute value of function at a given position summing over all ter
 function compute_value(tf :: TermFunction, position :: Array{Float64})
     nbterm = length(tf.observations)
     # pamp with batch size = 1000
-    values = pmap(i->tf.eval(tf.observations.datas[i], position), 1:nbterm; batch_size = 1000)
+    values = pmap(i->tf.eval(tf.observations, position, i), 1:nbterm; batch_size = 1000)
     value = sum(values)/nbterm
     value
 end
@@ -84,7 +87,7 @@ end
 function compute_value(tf :: TermFunction, position :: Array{Float64}, terms::Vector{Int64})
     nbterm = length(tf.observations)
     # pamp with batch size = 1000. check speed versus a mapreduce
-    values = pmap(i->tf.eval(tf.observations.datas[i], position), terms; batch_size = 1000)
+    values = pmap(i->tf.eval(tf.observations, position, i), terms; batch_size = 1000)
     value = sum(values)/nbterm
     value
 end
@@ -112,11 +115,11 @@ This structure is is dedicated to do all gradient computations
 
 """
 
-mutable struct TermGradient{F<:Function, N}
-    eval :: F
+mutable struct TermGradient
+    eval :: Function
     observations :: Observations
-    dim :: Dims{N}
-    function TermGradient{F,N}(evalg :: F, observations :: Observations, d::Dims{N}) where{F,N}
+    dim :: Dims
+    function TermGradient(evalg :: Function, observations :: Observations, d::Dims)
         # check signature
         z = zeros(d)
         evalg(observations, observations.datas[1], 1, z)
@@ -142,6 +145,7 @@ function compute_gradient!(termg::TermGradient, position :: Array{Float64}, term
     nbblocks = nbterms % batchsize
     nbblocks = rem(nbblocks,batchsize) > 0  ? nbblocks+1 : nbblocks
     gradblocks = zeros(length(gradient), nbblocks)
+    # CAVEAT to be threaded
     for i in 1::nbblocks 
         first = (i-1) * batchsize +1
         last = min(i*batchsize, nbterms)
@@ -206,5 +210,5 @@ end
 
 
 function get_nbterms(evaluator::Evaluator)
-    length(evaluator.compute_term_gradient.observations)
+    length(evaluator.compute_term_gradient.observations.datas)
 end
