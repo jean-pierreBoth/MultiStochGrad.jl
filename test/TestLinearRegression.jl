@@ -9,8 +9,9 @@ using Printf
 
 include("../src/applis/LinearRegression.jl")
 
+include("../src/scsg.jl")
+)
 # the . means we use the module LinearRegressionMod in the current module, other wise refer toa package!
-using .LinearRegressionMod
 
 
 function test_linear_regression_scsg()
@@ -32,9 +33,9 @@ function test_linear_regression_scsg()
     # define our problem. Do not need LinearRegressionMod.LinearRegression(observations) due to 
     linreg = LinearRegression(observations)
     # define our evaluations 
-    term_function =  LinearRegressionMod.TermFunction(LinearRegressionMod.term_value, observations, Dims{1}(3))
-    term_gradient = TermGradient(LinearRegression.term_gradient ,observations, Dims{1}(3))
-    evaluator = Evaluator(term_function, term_gradient)
+    term_function =  TermFunction(linreg.term_value, observations, Dims{1}(3))
+    term_gradient = TermGradient(linreg.term_gradient ,observations, Dims{1}(3))
+    evaluator = Evaluator(linreg.term_function, linreg.term_gradient)
     # define parameters for scsg
     scsg_pb = SCSG(0.1, 0.1, 5 , 0.95)
     # solve.
