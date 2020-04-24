@@ -116,12 +116,12 @@ end
 """
 
 function get_nbminibatch(batch_info::BatchSizeInfo)
-    m_j =  batch_info.nb_mini_batch_parameter
-    b_j = batch_info.mini_batch_size
+    m_j =  batch_info.nbminibatchparam
+    b_j = batch_info.minibatchsize
     # we return mean of geometric. Sampling too much instable due to large variance of geometric distribution.
     # ensure that it is at least 1 with ceil
     n_j = ceil(Int64, b_j/m_j)
-    n_j = min(n_j, batch_info.large_batch_size) 
+    n_j = min(n_j, batch_info.largebatchsize) 
     @debug " nb mini batch = " n_j
     n_j
 end
@@ -154,20 +154,21 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_
         # batch sampling
         batch_indexes = samplewithoutreplacement(batch_info.largebatchsize, 1:nbterms)
         # compute gradient on large batch index set and store initial position
-        compute_gradient!(evaluation.compute_term_gradient, position , batch_indexes, large_batch_gradient)
+        compute_gradient!(evaluation, position , batch_indexes, large_batch_gradient)
         # sample binomial law for number Nj of small batch iterations
-        nb_mini_batch = get_nbminibatch(scsg_pb)
+        nb_mini_batch = get_nbminibatch(batch_info)
         position_before_mini_batch = Vector{Float64}(position)
         # loop on small batch iterations
         for i in 1:nb_mini_batch
             # sample mini batch terms
             batch_indexes = samplewithoutreplacement(batch_info.minibatchsize, 1:nbterms)
-            compute_gradient!(evaluation.compute_term_gradient, position , batch_indexes, mini_batch_gradient_current)
-            compute_gradient!(evaluation.compute_term_gradient, position_before_mini_batch , batch_indexes, mini_batch_gradient_origin)
+            compute_gradient!(evaluation, position , batch_indexes, mini_batch_gradient_current)
+            compute_gradient!(evaluation, position_before_mini_batch , batch_indexes, mini_batch_gradient_origin)
             direction = mini_batch_gradient_current - mini_batch_gradient_origin + large_batch_gradient;
             position = position - batch_info.stepsize * direction;
         end
         value = compute_value(evaluation, position)
+        @debug "iteration  value position " iteration value position
         if iteration >= max_iterations 
             @info("Reached maximal number of iterations required , stopping optimization");
             return position, value

@@ -75,8 +75,8 @@ end
 This function compute value of function at a given position summing over all terms
     
 """
-function compute_value(tf :: TermFunction, position :: Array{Float64})
-    nbterm = length(tf.observations)
+function compute_value(tf :: TermFunction, position :: Array{Float64,1})
+    nbterm = length(tf.observations.datas)
     # pamp with batch size = 1000
     values = pmap(i->tf.eval(tf.observations, position, i), 1:nbterm; batch_size = 1000)
     value = sum(values)/nbterm
@@ -84,7 +84,7 @@ function compute_value(tf :: TermFunction, position :: Array{Float64})
 end
 
 
-function compute_value(tf :: TermFunction, position :: Array{Float64}, terms::Vector{Int64})
+function compute_value(tf :: TermFunction, position :: Array{Float64,1}, terms::Vector{Int64})
     nbterm = length(tf.observations)
     # pamp with batch size = 1000. check speed versus a mapreduce
     values = pmap(i->tf.eval(tf.observations, position, i), terms; batch_size = 1000)
@@ -132,26 +132,31 @@ end
 the function that will go in generic SCSG iterations
 
 """
-function compute_gradient!(termg::TermGradient, position, term, gradient)
+function compute_gradient!(termg::TermGradient, position::Array{Float64,1} , term:: Int64, gradient:: Array{Float64,1})
+    @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Int64 " 
     termg.eval(termg.observations, position, term, gradient)
 end
 
 
 
-function compute_gradient!(termg::TermGradient, position :: Array{Float64}, terms::Vector{Float64}, gradient::Array{Float64})
+function compute_gradient!(termg::TermGradient, position :: Array{Float64,1}, terms::Vector{Int64}, gradient::Array{Float64,1})
+    @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Vector{Int64} " 
     batchsize=1000
     nbterms = length(terms)
      # split in blocks
     nbblocks = nbterms % batchsize
     nbblocks = rem(nbblocks,batchsize) > 0  ? nbblocks+1 : nbblocks
+    @debug " nbblocks  " nbblocks
+        # CAVEAT , if gradient 2d array bug.
     gradblocks = zeros(length(gradient), nbblocks)
     # CAVEAT to be threaded
     for i in 1::nbblocks 
         first = (i-1) * batchsize +1
         last = min(i*batchsize, nbterms)
+        # CAVEAT , if gradient 2d array bug.
         gradtmp = zeros(Float64, length(gradient))
         for j in first:last
-            compute_gradient!(termg, position, terms[j], gradtmp)
+            termg.eval(termg.observations, position, terms[j], gradtmp)
             gradblocks[:,i]= gradblocks[:,i] + gradtmp
         end
     end
@@ -194,18 +199,43 @@ end
 the function that will go in generic SCSG iterations
 
 """
-function compute_gradient!(evaluator::Evaluator, position :: Array{Float64}, term, gradient :: Array{Float64})
-    evaluator.compute_term_gradient.eval(evaluator.compute_term_gradient.observations, position, term, gradient)
+function compute_gradient!(evaluator::Evaluator, position :: Array{Float64,1}, term::Int64 , gradient :: Array{Float64,1})
+    @debug " in  compute_gradient!(evaluator::Evaluator, position : ...terms::Int64 " 
+    compute_gradient!(evaluator.compute_term_gradient, position, term, gradient)
 end
 
 
-function compute_gradient!(evaluator::Evaluator, position :: Array{Float64}, terms::Vector{Float64}, gradient :: Array{Float64})
-    evaluator.compute_term_gradient.compute_gradient!(evaluator.compute_term_gradient.observations, position, terms, gradient)
+function compute_gradient!(evaluator::Evaluator, position :: Array{Float64,1}, terms::Vector{Int64}, gradient :: Array{Float64,1})
+    @debug " in  compute_gradient!(evaluator::Evaluator, position : ...terms::Vector{Int64} " 
+#    compute_gradient!(evaluator.compute_term_gradient, position, terms, gradient)
+    @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Vector{Int64} " 
+    termg = evaluator.compute_term_gradient
+    batchsize=1000
+    nbterms = length(terms)
+     # split in blocks
+    nbblocks = nbterms % batchsize
+    nbblocks = rem(nbblocks,batchsize) > 0  ? nbblocks+1 : nbblocks
+    @debug " nbblocks  " nbblocks
+        # CAVEAT , if gradient 2d array bug.
+    gradblocks = zeros(length(gradient), nbblocks)
+    # CAVEAT to be threaded
+    for i in 1:nbblocks 
+        first = (i-1) * batchsize +1
+        last = min(i*batchsize, nbterms)
+        # CAVEAT , if gradient 2d array bug.
+        gradtmp = zeros(Float64, length(gradient))
+        for j in first:last
+            termg.eval(termg.observations, position, terms[j], gradtmp)
+            gradblocks[:,i]= gradblocks[:,i] + gradtmp
+        end
+    end
+    # recall that in julia is column oriented so summing along rows is sum(,2)
+    gradient = sum(gradblocks,dims = 2)/nbterms
 end
 
 
-function compute_value(evaluator::Evaluator, position :: Array{Float64})
-    evaluator.compute_term_value.compute_value(evaluator.compute_term_value.observations, position)
+function compute_value(evaluator::Evaluator, position :: Array{Float64,1})
+    compute_value(evaluator.compute_term_value, position)
 end
 
 
