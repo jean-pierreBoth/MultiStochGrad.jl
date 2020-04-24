@@ -3,9 +3,18 @@
 
 using Distributed
 
+# we export here, so every submodule including this file gets visibility
+export Observations,
+    TermFunction,
+    compute_value,
+    TermGradient,
+    compute_gradient!,
+    Evaluator,
+    get_nbterms
 
-export Observations
 
+
+    
 """
 
 # Observations
@@ -66,7 +75,7 @@ This function compute value of function at a given position summing over all ter
 function compute_value(tf :: TermFunction, position :: Array{Float64})
     nbterm = length(tf.observations)
     # pamp with batch size = 1000
-    values = pmap(i->tf.eval(tf.observations[i], position), 1:nbterm; batch_size = 1000)
+    values = pmap(i->tf.eval(tf.observations.datas[i], position), 1:nbterm; batch_size = 1000)
     value = sum(values)/nbterm
     value
 end
@@ -75,7 +84,7 @@ end
 function compute_value(tf :: TermFunction, position :: Array{Float64}, terms::Vector{Int64})
     nbterm = length(tf.observations)
     # pamp with batch size = 1000. check speed versus a mapreduce
-    values = pmap(i->tf.eval(tf.observations[i], position), terms; batch_size = 1000)
+    values = pmap(i->tf.eval(tf.observations.datas[i], position), terms; batch_size = 1000)
     value = sum(values)/nbterm
     value
 end

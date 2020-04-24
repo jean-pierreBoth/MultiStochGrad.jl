@@ -7,9 +7,10 @@ using Random, Distributions
 using Printf
 
 
+include("../src/applis/LinearRegression.jl")
 
-
-using LinearRegressionMod
+# the . means we use the module LinearRegressionMod in the current module, other wise refer toa package!
+using .LinearRegressionMod
 
 
 function test_linear_regression_scsg()
@@ -27,11 +28,11 @@ function test_linear_regression_scsg()
         push!(datas, v)
         push!(values, y)
     end
-    observations= LinearRegressionMod.Observations(datas,values)
-    # define our problem
-    linreg = LinearRegressionMod.LinearRegression(observations)
+    observations= Observations(datas,values)
+    # define our problem. Do not need LinearRegressionMod.LinearRegression(observations) due to 
+    linreg = LinearRegression(observations)
     # define our evaluations 
-    term_function =  TermFunction(LinearRegressionMod.LinearRegression.term_value, observations, Dims{1}(3))
+    term_function =  LinearRegressionMod.TermFunction(LinearRegressionMod.term_value, observations, Dims{1}(3))
     term_gradient = TermGradient(LinearRegression.term_gradient ,observations, Dims{1}(3))
     evaluator = Evaluator(term_function, term_gradient)
     # define parameters for scsg
