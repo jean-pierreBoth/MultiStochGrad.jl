@@ -4,7 +4,7 @@
 
 
 
-include("/home.1/jpboth/Julia/MultiStochGrad.jl/src/evaluator.jl")
+include("../evaluator.jl")
 
 
     using LinearAlgebra
@@ -51,7 +51,6 @@ include("/home.1/jpboth/Julia/MultiStochGrad.jl/src/evaluator.jl")
     2. The coefficients of the last class have been assumed to be 0 to take into account
         for the identifiability constraint (Cf  Machine Learning Murphy par 9.2.2.1-2)
 
-    Our unknown is a 2 dimensional array  (length(Observations.datas[1]) + 1, nbclass -1)
 
     """
 
@@ -68,12 +67,9 @@ include("/home.1/jpboth/Julia/MultiStochGrad.jl/src/evaluator.jl")
             datas = Vector{Tuple{Vector{Float64}, Float64}}(undef, nbobs)
             # add interception term
             obs_dim = length(observations.datas[1])
-            # we search coefficients as 2 dimensional arrays , one column by class
-            # and each column corresponds to observations type
             our_dim = Dims{1}(obs_dim)
             for i in 1:nbobs
                 obs = zeros(Float64, our_dim)
-#                obs[1] = 1.
                 obs[1:end] = observations.datas[i][1:end]
                 datas[i] = (obs, observations.value_at_data[i])
             end
