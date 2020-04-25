@@ -147,7 +147,7 @@ function compute_gradient!(termg::TermGradient, position :: Array{Float64,1}, te
          # split in blocks
         nbblocks = floor(Int64, nbterms / batchsize)
         nbblocks = nbterms % batchsize > 0  ? nbblocks+1 : nbblocks
-        @debug " nbblocks  " nbblocks
+#        @debug " nbblocks  " nbblocks
             # CAVEAT , if gradient 2d array bug.
         gradblocks = zeros(length(gradient), nbblocks)
         # CAVEAT to be threaded
@@ -163,7 +163,7 @@ function compute_gradient!(termg::TermGradient, position :: Array{Float64,1}, te
         end
         # recall that in julia is column oriented so summing along rows is sum(,dims=2)
         copy!(gradient, sum(gradblocks,dims = 2)[:,1]/nbterms)
-        @debug "gradient sum blocks" gradient
+ #       @debug "gradient sum blocks" gradient
 end
 
 
@@ -215,6 +215,11 @@ end
 
 function compute_value(evaluator::Evaluator, position :: Array{Float64,1})
     compute_value(evaluator.compute_term_value, position)
+end
+
+
+function compute_value(evaluator::Evaluator, position :: Array{Float64,1}, terms::Vector{Int64})
+    compute_value(evaluator.compute_term_value, position, terms)
 end
 
 
