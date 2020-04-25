@@ -43,8 +43,8 @@ stores all parameters describing batch characteristics
 """
 mutable struct BatchSizeInfo
     iteration :: Int64
-    largebatchsize:: Int64
-    minibatchsize:: Int64
+    large_batchsize:: Int64
+    mini_batchsize:: Int64
     # parameter used in determining number of mini batch
     nbminibatchparam :: Float64   
     # step used in position update
@@ -117,11 +117,11 @@ end
 
 function get_nbminibatch(batch_info::BatchSizeInfo)
     m_j =  batch_info.nbminibatchparam
-    b_j = batch_info.minibatchsize
+    b_j = batch_info.mini_batchsize
     # we return mean of geometric. Sampling too much instable due to large variance of geometric distribution.
     # ensure that it is at least 1 with ceil
-    n_j = ceil(Int64, b_j/m_j)
-    n_j = min(n_j, batch_info.largebatchsize) 
+    n_j = ceil(Int64, m_j/b_j)
+    n_j = min(n_j, batch_info.large_batchsize) 
     @debug " nb mini batch = " n_j
     n_j
 end
@@ -151,8 +151,9 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_
         iteration += 1
         # get iteration parameters
         batch_info = get_batchsizeinfo(scsg_pb, batch_growing_factor, nbterms, iteration)
+        @debug "batch_info" batch_info
         # batch sampling
-        batch_indexes = samplewithoutreplacement(batch_info.largebatchsize, 1:nbterms)
+        batch_indexes = samplewithoutreplacement(batch_info.large_batchsize, 1:nbterms)
         # compute gradient on large batch index set and store initial position
         compute_gradient!(evaluation, position , batch_indexes, large_batch_gradient)
         @debug "large batch gradient " large_batch_gradient
@@ -163,7 +164,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_
         # loop on small batch iterations
         for i in 1:nb_mini_batch
             # sample mini batch terms
-            batch_indexes = samplewithoutreplacement(batch_info.minibatchsize, 1:nbterms)
+            batch_indexes = samplewithoutreplacement(batch_info.mini_batchsize, 1:nbterms)
             compute_gradient!(evaluation, position , batch_indexes, mini_batch_gradient_current)
             @debug "mini batch gradientcurrent  " mini_batch_gradient_current
             compute_gradient!(evaluation, position_before_mini_batch , batch_indexes, mini_batch_gradient_origin)

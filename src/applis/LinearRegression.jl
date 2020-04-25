@@ -33,7 +33,7 @@ include("/home.1/jpboth/Julia/MultiStochGrad.jl/src/evaluator.jl")
         #
         x, y = observations.datas[term], observations.value_at_data[term]
         e = y - dot(x, position)
-        @debug "term_gradient e , x term"  e x term
+#        @debug "term_gradient e , x term"  e x term
         # it is the .= that forces affectation! Just = does not write into gradient. copy! is clear
         copy!(gradient, -e * x)
     end

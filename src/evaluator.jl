@@ -140,28 +140,30 @@ end
 
 
 function compute_gradient!(termg::TermGradient, position :: Array{Float64,1}, terms::Vector{Int64}, gradient::Array{Float64,1})
-    @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Vector{Int64} " 
-    batchsize=1000
-    nbterms = length(terms)
-     # split in blocks
-    nbblocks = nbterms % batchsize
-    nbblocks = rem(nbblocks,batchsize) > 0  ? nbblocks+1 : nbblocks
-    @debug " nbblocks  " nbblocks
-        # CAVEAT , if gradient 2d array bug.
-    gradblocks = zeros(length(gradient), nbblocks)
-    # CAVEAT to be threaded
-    for i in 1::nbblocks 
-        first = (i-1) * batchsize +1
-        last = min(i*batchsize, nbterms)
-        # CAVEAT , if gradient 2d array bug.
-        gradtmp = zeros(Float64, length(gradient))
-        for j in first:last
-            termg.eval(termg.observations, position, terms[j], gradtmp)
-            gradblocks[:,i]= gradblocks[:,i] + gradtmp
+        @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Vector{Int64} "
+        # 
+        batchsize=1000
+        nbterms = length(terms)
+         # split in blocks
+        nbblocks = floor(Int64, nbterms / batchsize)
+        nbblocks = nbterms % batchsize > 0  ? nbblocks+1 : nbblocks
+        @debug " nbblocks  " nbblocks
+            # CAVEAT , if gradient 2d array bug.
+        gradblocks = zeros(length(gradient), nbblocks)
+        # CAVEAT to be threaded
+        for i in 1:nbblocks 
+            first = (i-1) * batchsize +1
+            last = min(i*batchsize, nbterms)
+            # CAVEAT , if gradient 2d array bug.
+            gradtmp = zeros(Float64, length(gradient))
+            for j in first:last
+                termg.eval(termg.observations, position, terms[j], gradtmp)
+                gradblocks[: ,i] .= gradblocks[:,i] + gradtmp
+            end
         end
-    end
-    # recall that in julia is column oriented so summing along rows is sum(,2)
-    gradient = sum(gradblocks,2)/nbterms
+        # recall that in julia is column oriented so summing along rows is sum(,dims=2)
+        copy!(gradient, sum(gradblocks,dims = 2)[:,1]/nbterms)
+        @debug "gradient sum blocks" gradient
 end
 
 
@@ -207,32 +209,7 @@ end
 
 function compute_gradient!(evaluator::Evaluator, position :: Array{Float64,1}, terms::Vector{Int64}, gradient :: Array{Float64,1})
     @debug " in  compute_gradient!(evaluator::Evaluator, position : ...terms::Vector{Int64} " 
-#    compute_gradient!(evaluator.compute_term_gradient, position, terms, gradient)
-    @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Vector{Int64} " 
-    termg = evaluator.compute_term_gradient
-    batchsize=1000
-    nbterms = length(terms)
-     # split in blocks
-    nbblocks = floor(Int64, nbterms / batchsize)
-    nbblocks = nbterms % batchsize > 0  ? nbblocks+1 : nbblocks
-    @debug " nbblocks  " nbblocks
-        # CAVEAT , if gradient 2d array bug.
-    gradblocks = zeros(length(gradient), nbblocks)
-    # CAVEAT to be threaded
-    for i in 1:nbblocks 
-        first = (i-1) * batchsize +1
-        last = min(i*batchsize, nbterms)
-        # CAVEAT , if gradient 2d array bug.
-        gradtmp = zeros(Float64, length(gradient))
-        for j in first:last
-            termg.eval(termg.observations, position, terms[j], gradtmp)
-            @debug " gradtmp" gradtmp
-            gradblocks[: ,i] .= gradblocks[:,i] + gradtmp
-        end
-    end
-    # recall that in julia is column oriented so summing along rows is sum(,dims=2)
-    copy!(gradient, sum(gradblocks,dims = 2)[:,1]/nbterms)
-    @debug "gradient sum blocks" gradient
+    compute_gradient!(evaluator.compute_term_gradient, position, terms, gradient)
 end
 
 
