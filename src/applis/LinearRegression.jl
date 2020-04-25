@@ -67,14 +67,14 @@ include("/home.1/jpboth/Julia/MultiStochGrad.jl/src/evaluator.jl")
             nbobs = length(observations.datas)
             datas = Vector{Tuple{Vector{Float64}, Float64}}(undef, nbobs)
             # add interception term
-            obs_dim = length(observations.datas[1]) + 1
+            obs_dim = length(observations.datas[1])
             # we search coefficients as 2 dimensional arrays , one column by class
             # and each column corresponds to observations type
             our_dim = Dims{1}(obs_dim)
             for i in 1:nbobs
                 obs = zeros(Float64, our_dim)
-                obs[1] = 1.
-                obs[2:end] = observations.datas[i][1:end]
+#                obs[1] = 1.
+                obs[1:end] = observations.datas[i][1:end]
                 datas[i] = (obs, observations.value_at_data[i])
             end
             new(datas, term_value, term_gradient)
