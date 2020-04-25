@@ -27,18 +27,17 @@ mutable struct LogisticRegression
     datas :: Vector{Tuple{Vector{Float64}, Float64}}
     # Must reformat data to take care of constraints.
     function LogisticRegression(nbclass :: Int64, observations::Observations)
-        nbobs = length(observations)
+        nbobs = length(observations.datas)
         datas = Vector{Tuple{Vector{Float64}, Float64}}(undef, nbobs)
         # add interception term
-        obs_dim = length(length(Observations.datas[1])) + 1
+        obs_dim = length(observations.datas[1])
         # we search coefficients as 2 dimensional arrays , one column by class
         # and each column corresponds to observations type
-        our_dim = Dims{2}(obs_dim, nbclass-1)
+        our_dim = Dims{2}((obs_dim, nbclass-1))
         for i in 1:nbobs
-            obs = zeros(Float64, our_dim)
-            obs[1] = 1.
-            obs[2:end] = observations[i][1:end]
-            datas[i] = (obs, observations[i].value_at_data)
+            obs = zeros(Float64, obs_dim)
+            obs[1:end] = observations.datas[i][1:end]
+            datas[i] = (obs, observations.value_at_data[i])
         end
         new(nbclass, datas)
     end
