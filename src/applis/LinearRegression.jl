@@ -22,7 +22,7 @@ include("../evaluator.jl")
     ```
     """
 
-    function term_value(observations:: Observations, position:: Array{Float64,1}, term :: Int64)
+    function term_value(observations:: Observations, position:: Array{Float64}, term :: Int64)
         x, y = observations.datas[term], observations.value_at_data[term]
         @assert length(position) == length(x) "inequal vector length"
         0.5 * (y - dot(position, x))^2
@@ -45,13 +45,16 @@ include("../evaluator.jl")
     # function LinearRegression
 
 
+    ## Fields
+
+    - datas
+
     1. vectors in data have been augmented by one (with valuse of 1.) for interception term so that the length of
         vectors in datas is 1 + length of data in Observations
 
-    2. The coefficients of the last class have been assumed to be 0 to take into account
-        for the identifiability constraint (Cf  Machine Learning Murphy par 9.2.2.1-2)
+    - term_value
 
-
+    - term_gradient
     """
 
     mutable struct LinearRegression

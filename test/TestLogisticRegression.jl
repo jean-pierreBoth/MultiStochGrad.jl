@@ -35,19 +35,22 @@ function mnist_logistic_regression_scsg()
     images = mnistdata.images
     dims = size(images)
     nbimages = dims[3]
+    nbpixels = dims[1] * dims[2]
     for i in 1:nbimages
-        v = Vector{Float64}(undef,length(images[i])+1)
+        v = Vector{Float64}()
         push!(v, 1.)
-        push!(v, reshape(images[i], length(images[i])))
+        # reshape and convert to Float64
+        v = cat(v, convert(Array{Float64}, reshape(images[:,:,i], nbpixels)), dims = 1)
+        v = v / 256.
         push!(datas, v)
-        push!(values, Float64(mnistdata.values[i]))
+        push!(values, Float64(mnistdata.labels[i]))
     end
     observations= Observations(datas,values)
     nbclass = 10
     # struct LogisticRegression takes care of interceptions terms and constraint on last class
     logreg = LogisticRegression(nbclass, observations)
-    # define TermFunction , TermGradient and Evaluator
-    dims = Dims{2}(length(images[1])+1 , nbclass-1)
+    # define TermFunction , TermGradient and Evaluator, dims is one less than number of classes for identifiability constraints
+    dims = Dims{2}((length(datas[1]) , nbclass-1))
     term_function =  TermFunction(logreg.term_value, observations, dims)
     term_gradient2 = TermGradient(logreg.term_gradient ,observations, dims)
     evaluator = Evaluator(term_function, term_gradient2)
@@ -55,7 +58,7 @@ function mnist_logistic_regression_scsg()
     scsg_pb = SCSG(0.5, 0.0015, 1 , 0.015)
     # solve.
     nb_iter = 15
-    position = fill(1., 3)
-    position, value = minimize(scsg_pb, evaluator, nb_iter, position)
+    initial_position= fill(0.5, dims)
+    position, value = minimize(scsg_pb, evaluator, nb_iter, initial_position)
     @printf(stdout, "value = %f, position = %f %f %f ", value , position)
 end

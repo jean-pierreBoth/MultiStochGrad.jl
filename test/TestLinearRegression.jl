@@ -39,7 +39,7 @@ function test_linear_regression_scsg()
     # define parameters for scsg
     scsg_pb = SCSG(0.1, 0.1, 5 , 0.95)
     # solve.
-    nb_iter = 3
+    nb_iter = 65
     position = fill(1., 3)
     position, value = minimize(scsg_pb, evaluator, nb_iter, position)
     @printf(stdout, "value = %f, position = %f %f %f ", value , position)

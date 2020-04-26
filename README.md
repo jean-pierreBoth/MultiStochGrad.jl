@@ -17,6 +17,8 @@
 "Accelerating Stochastic Gradient Descent using Predictive Variance Reduction" (2013).  
 [Advances in Neural Information Processing Systems, pages 315–323, 2013](https://papers.nips.cc/paper/4937-accelerating-stochastic-gradient-descent-using-predictive-variance-reduction.pdf)
 
+These algorithms minimize functions given by an expression:  
+**f(x) = 1/n ∑ fᵢ(x)** where fᵢ is a convex function.
 
 All algorithms alternates some form of large batch computation (computing gradient of many terms of the sum)
 and small or mini batches (computing a small number of terms, possibly just one, term of the gradient)
@@ -25,13 +27,12 @@ Further documentation can be found in docs of the Julia package, more in the doc
 
 ## Comparison with a Rust version
 
+There is also a Rust version of this package.
 The Rust version has also an implementation of the SAG algorithm:
 
 The Stochastic Averaged Gradient Descent as described in the paper:
 "Minimizing Finite Sums with the Stochastic Average Gradient" (2013, 2016)
 M.Schmidt, N.LeRoux, F.Bach.
-
-There is also a Rust version of this package.
 
 Here are some cpu-time comparisons :
 

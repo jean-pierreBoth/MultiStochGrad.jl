@@ -136,15 +136,15 @@ end
 
 """
 
-function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_position::Vector{Float64})
-    direction = zeros(Float64, length(initial_position))
-    large_batch_gradient = zeros(Float64, length(initial_position))
-    mini_batch_gradient_current = zeros(Float64, length(initial_position))
-    mini_batch_gradient_origin = zeros(Float64, length(initial_position))
+function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_position::Array{Float64})
+    direction = zeros(Float64, size(initial_position))
+    large_batch_gradient = zeros(Float64, size(initial_position))
+    mini_batch_gradient_current = zeros(Float64, size(initial_position))
+    mini_batch_gradient_origin = zeros(Float64, size(initial_position))
     nbterms = get_nbterms(evaluation)
     batch_growing_factor = get_batchgrowingfactor(scsg_pb, max_iterations, nbterms)
     #
-    position = Vector{Float64}(initial_position)
+    position = Array{Float64}(initial_position)
     iteration = 0
     more = true
     while more 
@@ -160,7 +160,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_
 
         # sample binomial law for number Nj of small batch iterations
         nb_mini_batch = get_nbminibatch(batch_info)
-        position_before_mini_batch = Vector{Float64}(position)
+        position_before_mini_batch = Array{Float64}(position)
         # loop on small batch iterations
         for i in 1:nb_mini_batch
             # sample mini batch terms
