@@ -45,19 +45,27 @@ function logistic_term_gradient(observations:: Observations, position:: Array{Fl
     dims = size(position)
     nbclass = dims[2]
     obs_term = observations.datas[term]
+    #
+#    @assert length(position[:,1]) == length(obs_term)
+    #
     class_term = round(Int64, observations.value_at_data[term])
     #
     den = 1.;
-    for k in 1:nbclass
-        dot_k = dot(position[:,k], obs_term)
-        den += exp(dot_k)
-    end
+    dot_k = zeros(Float64, nbclass)
+    BLAS.gemm!('T', 'N', 1., position, obs_term, 0., dot_k)
+    dot_k = exp.(dot_k)
+    den = den + sum(dot_k)
+    dot_k = dot_k / den
+    @debug "after BLAS"
+#    for k in 1:nbclass
+#        dot_k = dot(position[:,k], obs_term)
+#        den += exp(dot_k)
+#    end
     obs_dim =  length(obs_term)
     for k in 1:nbclass
-        @assert length(position[:,k]) == length(obs_term)
-        dot_k  = dot(obs_term, position[:,k])
+#        dot_k  = dot(obs_term, position[:,k])
         for j in 1:obs_dim
-            g_term = obs_term[j] * exp(dot_k)/den;
+            g_term = obs_term[j] * dot_k[k];
             # keep term corresponding to term_class (class of term passed as arg)
             if class_term == k 
                 g_term -= obs_term[j];
@@ -65,6 +73,7 @@ function logistic_term_gradient(observations:: Observations, position:: Array{Fl
             gradient[j, k] = g_term;
         end
     end
+    @debug "exiting logistic_term_gradient"
 end
 
 
