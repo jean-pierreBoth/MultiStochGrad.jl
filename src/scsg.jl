@@ -136,7 +136,7 @@ end
 
 """
 
-function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_position::Array{Float64})
+function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, initial_position::Array{Float64,N}) where {F,G,N}
     direction = zeros(Float64, size(initial_position))
     large_batch_gradient = zeros(Float64, size(initial_position))
     mini_batch_gradient_current = zeros(Float64, size(initial_position))

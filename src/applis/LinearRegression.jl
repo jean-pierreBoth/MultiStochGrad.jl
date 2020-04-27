@@ -22,14 +22,14 @@ include("../evaluator.jl")
     ```
     """
 
-    function term_value(observations:: Observations, position:: Array{Float64}, term :: Int64)
+    function linear_reg_term_value(observations:: Observations, position:: Array{Float64,1}, term :: Int64)
         x, y = observations.datas[term], observations.value_at_data[term]
         @assert length(position) == length(x) "inequal vector length"
         0.5 * (y - dot(position, x))^2
     end
 
 
-    function term_gradient(observations::Observations, position::Array{Float64}, term::Int64, gradient::Array{Float64})
+    function linear_reg_term_gradient(observations::Observations, position::Array{Float64,1}, term::Int64, gradient::Array{Float64,1})
         #
         x, y = observations.datas[term], observations.value_at_data[term]
         e = y - dot(x, position)
@@ -57,15 +57,15 @@ include("../evaluator.jl")
     - term_gradient
     """
 
-    mutable struct LinearRegression
+    mutable struct LinearRegression{F<:Function, G<:Function}
         # length of observation + 1. Values 1. in first slot  of arrays.
         datas :: Vector{Tuple{Vector{Float64}, Float64}}
         #
-        term_value :: Function
+        term_value :: F
         #
-        term_gradient ::Function
+        term_gradient ::G
         # Must reformat data to take care of constraints.
-        function LinearRegression(observations::Observations)
+        function LinearRegression{F,G}(observations::Observations) where {F <: Function,G <: Function}
             nbobs = length(observations.datas)
             datas = Vector{Tuple{Vector{Float64}, Float64}}(undef, nbobs)
             # add interception term
@@ -76,7 +76,7 @@ include("../evaluator.jl")
                 obs[1:end] = observations.datas[i][1:end]
                 datas[i] = (obs, observations.value_at_data[i])
             end
-            new(datas, term_value, term_gradient)
+            new(datas, linear_reg_term_value, linear_reg_term_gradient)
         end
     end
 

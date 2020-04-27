@@ -18,7 +18,7 @@ The dimension of our position vector is (nbclass - 1 ,  1 + length of an observa
 ```
 """
 
-function term_value(observations:: Observations, position:: Array{Float64}, term :: Int64)
+function logistic_term_value(observations:: Observations, position:: Array{Float64,2}, term :: Int64)
     #
     dims = size(position)
     nbclass = dims[2]
@@ -39,8 +39,8 @@ function term_value(observations:: Observations, position:: Array{Float64}, term
 end
 
 
-function term_gradient(observations:: Observations, position:: Array{Float64}, 
-                term :: Int64, gradient ::  Array{Float64})
+function logistic_term_gradient(observations:: Observations, position:: Array{Float64,2}, 
+                term :: Int64, gradient ::  Array{Float64,2})
     #
     dims = size(position)
     nbclass = dims[2]
@@ -96,15 +96,15 @@ Classes are supposed numbered from 0 to nbclass-1. (C/Rust indexing)
 
 """
 
-mutable struct LogisticRegression
+mutable struct LogisticRegression{F <: Function, G <: Function}
     nbclass :: Int64
     # length of observation + 1. Values 1. in first slot  of arrays.
     datas :: Vector{Tuple{Vector{Float64}, Float64}}
     #
-    term_value :: Function
+    term_value :: F
     #
-    term_gradient ::Function
-    function LogisticRegression(nbclass :: Int64, observations::Observations)
+    term_gradient ::G
+    function LogisticRegression{F,G}(nbclass :: Int64, observations::Observations, logistic_term_value::F, logistic_term_gradient::G) where {F,G}
         nbobs = length(observations.datas)
         datas = Vector{Tuple{Vector{Float64}, Float64}}(undef, nbobs)
         # add interception term
@@ -117,7 +117,7 @@ mutable struct LogisticRegression
             # CAVEAT we shout check that class numbering goes from 0 to nbclass-1
             datas[i] = (obs, observations.value_at_data[i])
         end
-        new(nbclass, datas, term_value, term_gradient)
+        new(nbclass, datas, logistic_term_value, logistic_term_gradient)
     end
 end
 

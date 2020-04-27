@@ -74,11 +74,11 @@ The evaluation function must have signature
 """
 
 
-mutable struct TermFunction
-    eval :: Function
+mutable struct TermFunction{F <: Function}
+    eval :: F
     observations :: Observations
     dim :: Dims
-    function TermFunction(evalf :: Function, observations :: Observations, d::Dims)
+    function TermFunction{F}(evalf :: F, observations :: Observations, d::Dims) where{F}
         # check signature
         z = zeros(d)
         dist = evalf(observations, z, 1)
@@ -94,15 +94,15 @@ end
 This function compute value of function at a given position summing over all terms
     
 """
-function compute_value(tf :: TermFunction, position :: Array{Float64})
+function compute_value(tf :: TermFunction{F}, position :: Array{Float64,N}) where {F,N}
     nbterm = length(tf.observations.datas)
     value = compute_value(tf, position, Vector{Int64}((1:nbterm)))
     value
 end
 
 
-function compute_value(tf :: TermFunction, position :: Array{Float64}, terms::Vector{Int64})
-    nbterms = length(tf.observations.datas)
+function compute_value(tf :: TermFunction{F}, position :: Array{Float64,N}, terms::Vector{Int64}) where {F,N}
+    nbterms = length(terms)
     # split in blocks
     batchsize = 2000
     nbblocks = floor(Int64, nbterms / batchsize)
@@ -142,11 +142,11 @@ This structure is is dedicated to do all gradient computations
 
 """
 
-mutable struct TermGradient
-    eval :: Function
+mutable struct TermGradient{G<:Function}
+    eval :: G
     observations :: Observations
     dim :: Dims
-    function TermGradient(evalg :: Function, observations :: Observations, d::Dims)
+    function TermGradient{G}(evalg :: G, observations :: Observations, d::Dims) where {G}
         # check signature
         z = zeros(d)
         grad = zeros(d)
@@ -160,17 +160,17 @@ end
 the function that will go in generic SCSG iterations
 
 """
-function compute_gradient!(termg::TermGradient, position::Array{Float64} , term:: Int64, gradient:: Array{Float64})
+function compute_gradient!(termg::TermGradient{G}, position::Array{Float64,N} , term:: Int64, gradient:: Array{Float64,N}) where {G,N}
     @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Int64 " 
     termg.eval(termg.observations, position, term, gradient)
 end
 
 
 
-function compute_gradient!(termg::TermGradient, position :: Array{Float64}, terms::Vector{Int64}, gradient::Array{Float64})
+function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N}, terms::Vector{Int64}, gradient::Array{Float64,N}) where {G,N}
         @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Vector{Int64} "
         # 
-        batchsize=2000
+        batchsize=1000
         nbterms = length(terms)
          # split in blocks
         nbblocks = floor(Int64, nbterms / batchsize)
@@ -188,7 +188,7 @@ function compute_gradient!(termg::TermGradient, position :: Array{Float64}, term
             gradblocks[i] = zeros(Float64, size(gradient))
             for j in first:last
                 termg.eval(termg.observations, position, terms[j], gradtmp)
-                gradblocks[i] .= gradblocks[i] + gradtmp
+                gradblocks[i] = gradblocks[i] + gradtmp
             end
         end
         # recall that in julia is column oriented so summing along rows is sum(,dims=2)
@@ -214,11 +214,11 @@ end
 
 """
 
-mutable struct Evaluator
+mutable struct Evaluator{F,G}
     #  A vector of observation , associated value
-    compute_term_value :: TermFunction
-    compute_term_gradient :: TermGradient
-    function Evaluator(compute_term_value :: TermFunction, compute_term_gradient :: TermGradient)
+    compute_term_value :: TermFunction{F}
+    compute_term_gradient :: TermGradient{G}
+    function Evaluator{F,G}(compute_term_value :: TermFunction{F}, compute_term_gradient :: TermGradient{G}) where {F,G}
         new(compute_term_value, compute_term_gradient)
     end
 end
@@ -231,28 +231,28 @@ end
 the function that will go in generic SCSG iterations
 
 """
-function compute_gradient!(evaluator::Evaluator, position :: Array{Float64}, term::Int64 , gradient :: Array{Float64})
+function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, term::Int64 , gradient :: Array{Float64,N}) where {F,G,N}
     @debug " in  compute_gradient!(evaluator::Evaluator, position : ...terms::Int64 " 
     compute_gradient!(evaluator.compute_term_gradient, position, term, gradient)
 end
 
 
-function compute_gradient!(evaluator::Evaluator, position :: Array{Float64}, terms::Vector{Int64}, gradient :: Array{Float64})
+function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, terms::Vector{Int64}, gradient :: Array{Float64,N}) where {F,G,N}
     @debug " in  compute_gradient!(evaluator::Evaluator, position : ...terms::Vector{Int64} " 
     compute_gradient!(evaluator.compute_term_gradient, position, terms, gradient)
 end
 
 
-function compute_value(evaluator::Evaluator, position :: Array{Float64})
+function compute_value(evaluator::Evaluator{F,G}, position :: Array{Float64,N}) where {F,G,N}
     compute_value(evaluator.compute_term_value, position)
 end
 
 
-function compute_value(evaluator::Evaluator, position :: Array{Float64}, terms::Vector{Int64})
+function compute_value(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, terms::Vector{Int64})  where {F,G,N}
     compute_value(evaluator.compute_term_value, position, terms)
 end
 
 
-function get_nbterms(evaluator::Evaluator)
+function get_nbterms(evaluator::Evaluator{F,G}) where {F,G}
     length(evaluator.compute_term_gradient.observations.datas)
 end
