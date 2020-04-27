@@ -151,7 +151,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iterations, initial_
         iteration += 1
         # get iteration parameters
         batch_info = get_batchsizeinfo(scsg_pb, batch_growing_factor, nbterms, iteration)
-        @debug "batch_info" batch_info
+        @info "batch_info" batch_info
         # batch sampling
         batch_indexes = samplewithoutreplacement(batch_info.large_batchsize, 1:nbterms)
         # compute gradient on large batch index set and store initial position

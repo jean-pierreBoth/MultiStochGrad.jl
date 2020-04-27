@@ -30,6 +30,7 @@ function mnist_logistic_regression_scsg()
     end
     mnistdata = mnist.MnistData(IMAGE_FNAME_STR, LABEL_FNAME_STR)
     # transform data into logistic regression problem
+    # labels are numbered from 0 to 9.
     datas = Vector{Vector{Float64}}()
     values = Vector{Float64}()
     images = mnistdata.images
@@ -47,7 +48,7 @@ function mnist_logistic_regression_scsg()
     end
     observations= Observations(datas,values)
     nbclass = 10
-    # struct LogisticRegression takes care of interceptions terms and constraint on last class
+    # struct LogisticRegression takes care of interceptions terms and constraint on first class
     logreg = LogisticRegression(nbclass, observations)
     # define TermFunction , TermGradient and Evaluator, dims is one less than number of classes for identifiability constraints
     dims = Dims{2}((length(datas[1]) , nbclass-1))
@@ -57,8 +58,9 @@ function mnist_logistic_regression_scsg()
     # define parameters for scsg
     scsg_pb = SCSG(0.5, 0.0015, 1 , 0.015)
     # solve.
-    nb_iter = 15
+    nb_iter = 50
     initial_position= fill(0.5, dims)
+    @info "initial error " compute_value(evaluator, initial_position)
     position, value = minimize(scsg_pb, evaluator, nb_iter, initial_position)
     @printf(stdout, "value = %f, position = %f %f %f ", value , position)
 end

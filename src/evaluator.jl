@@ -3,6 +3,7 @@
 
 using Distributed
 
+
 # we export here, so every submodule including this file gets visibility
 export Observations,
     TermFunction,
@@ -95,18 +96,26 @@ This function compute value of function at a given position summing over all ter
 """
 function compute_value(tf :: TermFunction, position :: Array{Float64})
     nbterm = length(tf.observations.datas)
-    # pamp with batch size = 1000
-    values = pmap(i->tf.eval(tf.observations, position, i), 1:nbterm; batch_size = 1000)
-    value = sum(values)/nbterm
+    value = compute_value(tf, position, Vector{Int64}((1:nbterm)))
     value
 end
 
 
 function compute_value(tf :: TermFunction, position :: Array{Float64}, terms::Vector{Int64})
-    nbterm = length(tf.observations)
+    nbterms = length(tf.observations.datas)
+    # split in blocks
+    batchsize = 2000
+    nbblocks = floor(Int64, nbterms / batchsize)
+    nbblocks = nbterms % batchsize > 0  ? nbblocks+1 : nbblocks
+    blockvalue = zeros(Float64, nbblocks)
+    # 
+    Threads.@threads for i in 1:nbblocks 
+        first = (i-1) * batchsize +1
+        last = min(i*batchsize, nbterms)
+        blockvalue[i] = mapreduce(i->tf.eval(tf.observations, position, i), + , terms[first:last])
+    end
     # pamp with batch size = 1000. check speed versus a mapreduce
-    values = pmap(i->tf.eval(tf.observations, position, i), terms; batch_size = 1000)
-    value = sum(values)/nbterm
+    value = sum(blockvalue)/nbterms
     value
 end
 
@@ -161,7 +170,7 @@ end
 function compute_gradient!(termg::TermGradient, position :: Array{Float64}, terms::Vector{Int64}, gradient::Array{Float64})
         @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Vector{Int64} "
         # 
-        batchsize=1000
+        batchsize=2000
         nbterms = length(terms)
          # split in blocks
         nbblocks = floor(Int64, nbterms / batchsize)
@@ -171,7 +180,7 @@ function compute_gradient!(termg::TermGradient, position :: Array{Float64}, term
         dimg = ndims(gradient)
         gradblocks = Vector{Array{Float64,dimg}}(undef, nbblocks)
         # CAVEAT to be threaded
-        for i in 1:nbblocks 
+        Threads.@threads for i in 1:nbblocks 
             first = (i-1) * batchsize +1
             last = min(i*batchsize, nbterms)
             # must respect dimensions of gradient
