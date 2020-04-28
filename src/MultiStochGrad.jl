@@ -1,8 +1,10 @@
+module MultiStochGrad
+
 using Printf
 
 using Logging
 using Base.CoreLogging
-
+using BLAS
 
 
 debug_log = stdout
@@ -17,5 +19,7 @@ include("applis/LogisticRegression.jl")
 
 # export list
 
-######################################################################
+
+
+end
 

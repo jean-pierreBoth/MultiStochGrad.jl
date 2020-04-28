@@ -1,7 +1,6 @@
 # evaluation of objective function
 
 
-using Distributed
 
 
 # we export here, so every submodule including this file gets visibility
