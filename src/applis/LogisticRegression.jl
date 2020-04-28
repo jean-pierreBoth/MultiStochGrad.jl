@@ -22,18 +22,18 @@ function logistic_term_value(observations:: Observations, position:: Array{Float
     #
     dims = size(position)
     nbclass = dims[2]
+    #
     term_data = observations.datas[term]
     term_class = round(Int64, observations.value_at_data[term])
+    # compute dot_k[k] = dot(position[:,k], obs_term)
+    dot_k = zeros(Float64, nbclass)
+    BLAS.gemm!('T', 'N', 1., position, term_data, 0., dot_k)
+    logarg = 1. + sum(exp.(dot_k))
     #
-    logarg = 1.
-    for k in 1:nbclass
-        logarg += exp(dot(term_data, position[:,k]))
-    end
     other_term = 0.
     # This relies on our convention that class 0 bears the identifiability constraint.
     if term_class >= 1
-        @assert size(term_data) == size(position[:,term_class])
-        other_term  = dot(term_data, position[:,term_class])
+        other_term  = dot_k[term_class]
     end
     log(logarg) - other_term
 end
@@ -52,25 +52,16 @@ function logistic_term_gradient(observations:: Observations, position:: Array{Fl
     #
     den = 1.;
     dot_k = zeros(Float64, nbclass)
+    # compute dot_k[k] = dot(position[:,k], obs_term)
     BLAS.gemm!('T', 'N', 1., position, obs_term, 0., dot_k)
     dot_k = exp.(dot_k)
     den = den + sum(dot_k)
     dot_k = dot_k / den
-    @debug "after BLAS"
-#    for k in 1:nbclass
-#        dot_k = dot(position[:,k], obs_term)
-#        den += exp(dot_k)
-#    end
     obs_dim =  length(obs_term)
     for k in 1:nbclass
-#        dot_k  = dot(obs_term, position[:,k])
-        for j in 1:obs_dim
-            g_term = obs_term[j] * dot_k[k];
-            # keep term corresponding to term_class (class of term passed as arg)
-            if class_term == k 
-                g_term -= obs_term[j];
-            end
-            gradient[j, k] = g_term;
+        gradient[:,k] .= obs_term .* dot_k[k]
+        if k == class_term
+            gradient[:,k] .= gradient[:,k] .- obs_term
         end
     end
     @debug "exiting logistic_term_gradient"

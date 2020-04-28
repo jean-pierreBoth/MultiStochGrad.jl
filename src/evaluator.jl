@@ -170,7 +170,7 @@ end
 function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N}, terms::Vector{Int64}, gradient::Array{Float64,N}) where {G,N}
         @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Vector{Int64} "
         # 
-        batchsize=1000
+        batchsize=1500
         nbterms = length(terms)
          # split in blocks
         nbblocks = floor(Int64, nbterms / batchsize)

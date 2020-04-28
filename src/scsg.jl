@@ -151,7 +151,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
         iteration += 1
         # get iteration parameters
         batch_info = get_batchsizeinfo(scsg_pb, batch_growing_factor, nbterms, iteration)
-        @info "batch_info" batch_info
+        @debug "batch_info" batch_info
         # batch sampling
         batch_indexes = samplewithoutreplacement(batch_info.large_batchsize, 1:nbterms)
         # compute gradient on large batch index set and store initial position
@@ -160,21 +160,19 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
 
         # sample binomial law for number Nj of small batch iterations
         nb_mini_batch = get_nbminibatch(batch_info)
+        @info "batch info " batch_info.large_batchsize batch_info.mini_batchsize
         position_before_mini_batch = Array{Float64}(position)
         # loop on small batch iterations
         for i in 1:nb_mini_batch
             # sample mini batch terms
             batch_indexes = samplewithoutreplacement(batch_info.mini_batchsize, 1:nbterms)
             compute_gradient!(evaluation, position , batch_indexes, mini_batch_gradient_current)
-            @debug "mini batch gradientcurrent  " mini_batch_gradient_current
             compute_gradient!(evaluation, position_before_mini_batch , batch_indexes, mini_batch_gradient_origin)
-            @debug "mini batch gradient origin " mini_batch_gradient_origin
             direction = mini_batch_gradient_current - mini_batch_gradient_origin + large_batch_gradient;
-            @debug "step, position " batch_info.stepsize direction
             position = position - batch_info.stepsize * direction;
         end
         value = compute_value(evaluation, position)
-        @debug "iteration  value position " iteration value position
+        @info "iteration  value " iteration value
         if iteration >= max_iterations 
             @info("Reached maximal number of iterations required , stopping optimization");
             return position, value

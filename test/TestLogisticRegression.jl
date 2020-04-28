@@ -5,7 +5,7 @@ using MultiStochGrad
 using  LinearAlgebra, Test
 
 
-
+using BLAS
 using  LinearAlgebra, Test
 using Random, Distributions
 using Printf
@@ -47,7 +47,7 @@ function mnist_logistic_regression_scsg()
         push!(values, Float64(mnistdata.labels[i]))
     end
     observations= Observations(datas,values)
-    nbclass = 10
+    nbclass = 50
     # struct LogisticRegression takes care of interceptions terms and constraint on first class
     # define TermFunction , TermGradient and Evaluator, dims is one less than number of classes for identifiability constraints
     dims = Dims{2}((length(datas[1]) , nbclass-1))
@@ -55,10 +55,10 @@ function mnist_logistic_regression_scsg()
     term_gradient2 = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,observations, dims)
     evaluator = Evaluator{typeof(logistic_term_value),typeof(logistic_term_gradient)}(term_function, term_gradient2)
     # define parameters for scsg
-    scsg_pb = SCSG(0.5, 0.0015, 1 , 0.015)
+    scsg_pb = SCSG(0.25, 0.0015, 1 , 0.015)
     # solve.
     nb_iter = 50
-    initial_position= fill(0.5, dims)
+    initial_position= fill(0.0, dims)
     @info "initial error " compute_value(evaluator, initial_position)
     @time position, value = minimize(scsg_pb, evaluator, nb_iter, initial_position)
     @printf(stdout, "value = %f, position = %f %f %f ", value , position)
