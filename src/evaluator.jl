@@ -89,7 +89,7 @@ end
 
 
 """
-#  function compute_valuetf :: TermFunction, position :: Vector{Float64})
+#  function compute_value(tf :: TermFunction{F}, position :: Vector{Float64})
 
 This function compute value of function at a given position summing over all terms
     
