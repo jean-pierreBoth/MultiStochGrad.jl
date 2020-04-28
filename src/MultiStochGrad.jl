@@ -4,7 +4,7 @@ using Printf
 
 using Logging
 using Base.CoreLogging
-using BLAS
+using LinearAlgebra
 
 
 debug_log = stdout

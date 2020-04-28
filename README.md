@@ -43,9 +43,10 @@ Run times are those obtained on a 4 hyperthreaded i7-cores laptop at 2.7Ghz
 
 ### SCSG logistic regression
 
-The identifiability constraint was set on the class corresponding to the 0 digit contrary to the Rust tests
+The identifiability constraint was set on the class corresponding to the 0 digit. (Contrary to the Rust tests
 where the 9-digit class was chosen, this explains the different initial error and the fact that the best step
-was not the same.
+was not the same).
+
 For the signification of the parameters B_0 , b_O, see documentation of SCSG.
 Here we give some results:
 

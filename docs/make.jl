@@ -2,19 +2,16 @@ push!(LOAD_PATH, "../src/", "../test/src/")
 
 DOCUMENTER_DEBUG=true
 
-using Documenter, MultiGradStoch
+using Documenter, MultiStochGrad
 
 
 makedocs(
     format = Documenter.HTML(prettyurls = false),
-    sitename = "MultiGradStoch",
+    sitename = "MultiStochGrad",
     pages = Any[
         "Introduction" => "INTRO.md",
         "MultiStochGrad.jl " => "index.md",
-        "evaluator.jl" => "interface.md",
-        "scsg.jl"   => "scsg.md",
-        "Tests" => "Test.md",
-        "Applications" => "Applications"
+        "scsg.jl" => "scsg.md",
     ]
 )
 

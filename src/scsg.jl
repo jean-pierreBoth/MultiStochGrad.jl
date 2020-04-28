@@ -11,7 +11,6 @@ include("evaluator.jl")
 
 
 """
-
 # SCSG
 
 This is the structure describing parameters used in Stochastic Controlled Stochastic Gradient
@@ -24,7 +23,6 @@ This is the structure describing parameters used in Stochastic Controlled Stocha
 - large_batch_size_init :
 
 """
-
 mutable struct SCSG
     # initial step size
     eta_zero :: Float64
@@ -41,8 +39,7 @@ end
 """
 # struct BatchSizeInfo
 
-stores all parameters describing batch characteristics
-
+stores all parameters describing one batch characteristics
 
 """
 mutable struct BatchSizeInfo
@@ -116,9 +113,8 @@ end
 
 
 """
-
+# function get_nbminibatch(batch_info::BatchSizeInfo)
 """
-
 function get_nbminibatch(batch_info::BatchSizeInfo)
     m_j =  batch_info.nbminibatchparam
     b_j = batch_info.mini_batchsize
@@ -130,16 +126,30 @@ function get_nbminibatch(batch_info::BatchSizeInfo)
     n_j
 end
 
+
+
+
 """
-# function minimize(scsg_pb::SCSG, evaluation::Evaluator, max_iter :: Int64, initial_position::Vector{Float64})
+# function minimize(scsgpb::SCSG, evaluation::Evaluator, max_iter::Int64, initialposition::Array{Float64,N})
+
+Generic function used in minimisations for all algorithms.  
+    
+The function has 3 types parameters F, G and N. 
+
+F and G corresponds to the types of function used in instantiating the structure TermFunction{F} and TermmGradient{G}
+(see examples in test directory the examples TestLinearRegression or TestLogisticRegression). 
+
+N is the dimension of array for searched parameters/gradients which can vary according to the problem and the way we modelize it.
+(See Logistic regression where we used N=2)
+
 
 ## Args
-- scsg_pb : the structure describing main parameters of the batch strategy
+- scsgpb : the structure describing main parameters of the batch strategy
+- Evaluator{F,G}
 - max_iter : maximum number of iterations
-- initial_position : initial position of the iterations
+- initialposition : initial position of the iterations
 
 """
-
 function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, initial_position::Array{Float64,N}) where {F,G,N}
     direction = zeros(Float64, size(initial_position))
     large_batch_gradient = zeros(Float64, size(initial_position))
@@ -160,9 +170,8 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
         batch_indexes = samplewithoutreplacement(batch_info.large_batchsize, 1:nbterms)
         # compute gradient on large batch index set and store initial position
         compute_gradient!(evaluation, position , batch_indexes, large_batch_gradient)
-        @debug "large batch gradient " large_batch_gradient
 
-        # sample binomial law for number Nj of small batch iterations
+        # get mean number  binomial law for number Nj of small batch iterations
         nb_mini_batch = get_nbminibatch(batch_info)
         @info "batch info " batch_info.large_batchsize batch_info.mini_batchsize
         position_before_mini_batch = Array{Float64}(position)

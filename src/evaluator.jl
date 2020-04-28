@@ -29,7 +29,6 @@ For regressions problems for example length(datas) is number of observations.
     and length(datas[1]) is 1+dimension of observations data beccause of interception terms.
 
 """
-
 mutable struct Observations 
     # 
     datas :: Vector{Vector{Float64}}
@@ -37,25 +36,25 @@ mutable struct Observations
 end
 
 
-"""
 
-# TermFunction
+"""
+# TermFunction{F}  with F<: Function
 
 A structure grouping observations and an evaluation function
 
-The evaluation function must have signature
-    (observations: Observations, position: Array{Float64, N}, term : Int64) -> Float64
+The evaluation function must have signature: 
+
+    **Fn(observations: Observations, position: Array{Float64, N}, term : Int64) -> Float64**
 
 ## Args:
 
--  position : is position we want the function value at. So it is a vector
-    of the same dimension as datas vector in observations.
+- position : is position we want the function value at.
 
 - term : the rank of term in sum representing objective function
 
 ## Fields
 
-- eval is a function of signature Fn(Observations, Array{Float64}, Int64)::Float64
+- eval is a function of signature :  **Fn(Observations, Array{Float64, N}, Int64)::Float64**
     taking as arguments (in this order): 
         . observations
         . position
@@ -66,13 +65,15 @@ The evaluation function must have signature
 - dims : characterize the dimensions on variable for which we do a minimization
         it is not the same as observations which is always a one dimensional array.
         It is also the dimension of gradients we compute.
-        For example on a logistic regression with nbclass dims = (d , nbclass-1)
-        with d  is lenght(observations)
-        nbclass -1 beccause of solvability constraints.
+
+        For example on a logistic regression with nbclass we used (Cf applis) dims = (d , nbclass-1)
+        with d is lenght(observations) nbclass -1 beccause of solvability constraints.
+
+Note:
+    When instiantating a TermFunction you just write
+    *tf = TermFunction{typeof(yourfunction)}(yourfunction, obsrevations, dims)*
 
 """
-
-
 mutable struct TermFunction{F <: Function}
     eval :: F
     observations :: Observations
@@ -100,6 +101,14 @@ function compute_value(tf :: TermFunction{F}, position :: Array{Float64,N}) wher
 end
 
 
+
+
+"""
+#  function compute_value(tf :: TermFunction{F}, position :: Array{Float64,N}, terms::Vector{Int64})
+
+This function compute value of function at a given position summing over all terms passed as arg
+    
+"""
 function compute_value(tf :: TermFunction{F}, position :: Array{Float64,N}, terms::Vector{Int64}) where {F,N}
     nbterms = length(terms)
     # split in blocks
@@ -122,25 +131,24 @@ end
 
 
 """
-# struct TermGradient
+# struct TermGradient{G}  with G <: Function
 
-This structure is is dedicated to do all gradient computations
+This structure is the building block for all gradient computations
 
 ## Fields
 
-- eval is a function of signature Fn(Observations, Array{Float64}, Int64, Array{Float64}) 
+- eval is a function of signature Fn(Observations, Array{Float64,N}, Int64, Array{Float64,N}) 
     taking as arguments (in this order): 
         . observations
         . position
         . a term rank
-        . a vector for gradient to be returned in (avoid reallocations as we sum the result in loops)
-            Array for gradient has the same dimension as array for position (...)
+        . a vector for gradient to be returned in (it avoid reallocations as we loop on this function summing
+            the resulting Array on required terms). Array for gradient has the same dimension as array for position (...)
     
 - observations : the observations of the problem
 - dims : characterize the dimensions on variable for which we do a minimization
 
 """
-
 mutable struct TermGradient{G<:Function}
     eval :: G
     observations :: Observations
@@ -155,8 +163,12 @@ mutable struct TermGradient{G<:Function}
     end
 end
 
+
 """
-the function that will go in generic SCSG iterations
+# function compute_gradient!(termg::TermGradient{G}, position::Array{Float64,N} , term:: Int64, gradient:: Array{Float64,N}) where {G,N}
+
+
+the function that dispatch to TermGradient do do the actual gradient computation for a term.
 
 """
 function compute_gradient!(termg::TermGradient{G}, position::Array{Float64,N} , term:: Int64, gradient:: Array{Float64,N}) where {G,N}
@@ -166,15 +178,25 @@ end
 
 
 
+"""
+# function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N}, terms::Vector{Int64}, gradient::Array{Float64,N}) where {G,N}
+
+This function compute a gradient Array at a given position summing over all terms passed as arg.
+
+NOTA: It must be noted that this function computes the mean of gradients returned by gradient returned on each term.
+So that the gradient computed on a batch is an estimator of the gradient computed on the whole objective function.
+
+It is multithreaded and computes gradient by blocks of 1500 terms.
+
+"""
 function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N}, terms::Vector{Int64}, gradient::Array{Float64,N}) where {G,N}
-        @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Vector{Int64} "
+#        @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Vector{Int64} "
         # 
         batchsize=1500
         nbterms = length(terms)
          # split in blocks
         nbblocks = floor(Int64, nbterms / batchsize)
         nbblocks = nbterms % batchsize > 0  ? nbblocks+1 : nbblocks
-#        @debug " nbblocks  " nbblocks
         # we must allocate an array of nbblocks arrays of dimensions size(gradient)
         dimg = ndims(gradient)
         gradblocks = Vector{Array{Float64,dimg}}(undef, nbblocks)
@@ -199,20 +221,20 @@ end
 #####################################################################
 
 """
-#  Evaluator
+#  Evaluator{F,G}
 
    This structure contains all that is necessary to compute function value at any term
-   and gradients total or any partial sum of terms.
+   and gradient total or any partial sum of terms.
    It can be passed as argument in any algorithm for our stochastic gradients.
     
 ## Fields
 
-- compute_term_value : to do computations of function value
-- compute_term_gradient: to do computations of gradients value
+- compute_term_value : a TermFunction{F}
+- compute_term_gradient: a TermGradient{G}
 
+It is associated to various functions dispatching computations to it.
 
 """
-
 mutable struct Evaluator{F,G}
     #  A vector of observation , associated value
     compute_term_value :: TermFunction{F}
@@ -227,7 +249,10 @@ end
 
 
 """
-the function that will go in generic SCSG iterations
+# function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, term::Int64 , gradient :: Array{Float64,N}) where {F,G,N}
+
+
+the function computed gradient given an evaluator, a position, and a term
 
 """
 function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, term::Int64 , gradient :: Array{Float64,N}) where {F,G,N}
@@ -236,22 +261,45 @@ function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,
 end
 
 
+
+"""
+# function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, terms::Vector{Int64}, gradient :: Array{Float64,N}) where {F,G,N}
+
+the function computes a gradient given an evaluator, a position, and a vector of rank term
+
+"""
 function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, terms::Vector{Int64}, gradient :: Array{Float64,N}) where {F,G,N}
     @debug " in  compute_gradient!(evaluator::Evaluator, position : ...terms::Vector{Int64} " 
     compute_gradient!(evaluator.compute_term_gradient, position, terms, gradient)
 end
 
 
+"""
+# function ompute_value(evaluator::Evaluator{F,G}, position :: Array{Float64,N}) where {F,G,N}
+
+this function computes a value given an evaluator, and a position using all terms
+"""
 function compute_value(evaluator::Evaluator{F,G}, position :: Array{Float64,N}) where {F,G,N}
     compute_value(evaluator.compute_term_value, position)
 end
 
 
+"""
+# function compute_value(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, terms::Vector{Int64})  where {F,G,N}
+
+this function computes a value given an evaluator, and a position and a list of terms
+
+"""
 function compute_value(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, terms::Vector{Int64})  where {F,G,N}
     compute_value(evaluator.compute_term_value, position, terms)
 end
 
 
+"""
+# function function get_nbterms(evaluator::Evaluator{F,G}) where {F,G}
+
+retrieves number of terms in the sum defining objective function
+"""
 function get_nbterms(evaluator::Evaluator{F,G}) where {F,G}
     length(evaluator.compute_term_gradient.observations.datas)
 end
