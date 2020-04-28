@@ -1,7 +1,7 @@
 # logistic regression use case
 
 using LinearAlgebra
-
+using BLAS
 
 include("../evaluator.jl")
 

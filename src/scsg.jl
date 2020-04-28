@@ -2,6 +2,10 @@
 
 using Random
 
+export SCSG,
+        minimize,
+        BatchSizeInfo,
+        get_batchsizeinfo
 
 include("evaluator.jl")
 
