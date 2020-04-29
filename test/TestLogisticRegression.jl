@@ -20,9 +20,7 @@ const IMAGE_FNAME_STR  = "/home.1/jpboth/Data/MNIST/train-images-idx3-ubyte"
 const LABEL_FNAME_STR  = "/home.1/jpboth/Data/MNIST/train-labels-idx1-ubyte"
 
 
-
-
-function mnist_logistic_regression_scsg()
+function initMnitObservations()
     # check path and load
     if !isfile(IMAGE_FNAME_STR) || !isfile(LABEL_FNAME_STR)
         @warn("mnist_logistic_regression : bad path to mnist data file")
@@ -46,8 +44,13 @@ function mnist_logistic_regression_scsg()
         push!(datas, v)
         push!(values, Float64(mnistdata.labels[i]))
     end
-    observations= Observations(datas,values)
-    nbclass = 50
+    observations = Observations(datas,values)
+end
+
+
+function mnist_logistic_regression_scsg()
+    observations= initMnitObservations()
+    nbclass = 10
     # struct LogisticRegression takes care of interceptions terms and constraint on first class
     # define TermFunction , TermGradient and Evaluator, dims is one less than number of classes for identifiability constraints
     dims = Dims{2}((length(datas[1]) , nbclass-1))
@@ -61,5 +64,26 @@ function mnist_logistic_regression_scsg()
     initial_position= fill(0.0, dims)
     @info "initial error " compute_value(evaluator, initial_position)
     @time position, value = minimize(scsg_pb, evaluator, nb_iter, initial_position)
+    @printf(stdout, "value = %f, position = %f %f %f ", value , position)
+end
+
+
+
+function mnist_logistic_regression_svrg()
+    observations= initMnitObservations()
+    nbclass = 10
+    # struct LogisticRegression takes care of interceptions terms and constraint on first class
+    # define TermFunction , TermGradient and Evaluator, dims is one less than number of classes for identifiability constraints
+    dims = Dims{2}((length(datas[1]) , nbclass-1))
+    term_function =  TermFunction{typeof(logistic_term_value)}(logistic_term_value, observations, dims)
+    term_gradient2 = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,observations, dims)
+    evaluator = Evaluator{typeof(logistic_term_value),typeof(logistic_term_gradient)}(term_function, term_gradient2)
+    # define parameters for svrg  1000 minibatch , step 0.02
+    svrg_pb = SVRG(1000, 0.02)
+    # solve.
+    nb_iter = 100
+    initial_position= fill(0.0, dims)
+    @info "initial error " compute_value(evaluator, initial_position)
+    @time position, value = minimize(svrg_pb, evaluator, nb_iter, initial_position)
     @printf(stdout, "value = %f, position = %f %f %f ", value , position)
 end

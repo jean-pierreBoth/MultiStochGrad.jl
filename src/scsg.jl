@@ -130,16 +130,16 @@ end
 
 
 """
-# function minimize(scsgpb::SCSG, evaluation::Evaluator, max_iter::Int64, initialposition::Array{Float64,N})
+# function minimize(scsgpb::SCSG, evaluation::Evaluator{F,G}, max_iter::Int64, initialposition::Array{Float64,N})
 
 Generic function used in minimisations for all algorithms.  
     
 The function has 3 types parameters F, G and N. 
 
-F and G corresponds to the types of function used in instantiating the structure TermFunction{F} and TermmGradient{G}
-(see examples in test directory the examples TestLinearRegression or TestLogisticRegression). 
+- F and G corresponds to the types of function used in instantiating the structure TermFunction{F} and TermmGradient{G}
+(see in test and examples directores the cases: TestLinearRegression or TestLogisticRegression). 
 
-N is the dimension of array for searched parameters/gradients which can vary according to the problem and the way we modelize it.
+- N is the dimension of array for searched parameters (position and gradients) which depends upon the problem and the way we modelize it.
 (See Logistic regression where we used N=2)
 
 

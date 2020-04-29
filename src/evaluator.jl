@@ -216,6 +216,18 @@ function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N},
 end
 
 
+
+
+"""
+# function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N}, gradient::Array{Float64,N}) where {G,N}
+
+This function compute a gradient Array at a given position summing over all terms
+"""
+function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N}, gradient::Array{Float64,N}) where {G,N}
+    nbterms = length(termg.observations.datas)
+    compute_gradient!(termg, position, collect(1:nbterms), gradient)
+end
+
 #####################################################################
 
 """
