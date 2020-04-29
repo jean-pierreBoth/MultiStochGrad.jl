@@ -19,13 +19,20 @@
     "Accelerating Stochastic Gradient Descent using Predictive Variance Reduction" (2013).  
     [Advances in Neural Information Processing Systems, pages 315–323, 2013](https://papers.nips.cc/paper/4937-accelerating-stochastic-gradient-descent-using-predictive-variance-reduction.pdf)
 
-These algorithms minimize functions given by an expression: 
+These algorithms minimize functions given by an expression:  
 
         f(x) = 1/n ∑ fᵢ(x) where fᵢ is a convex function.
 
 All algorithms alternates some form of large batch computation (computing gradient of many terms of the sum)
 and small or mini batches (computing a small number of terms, possibly just one, term of the gradient)
 and updating position by combining these global and local gradients.
+
+## Structure of the package and documentation
+
+The structure of the package is explicited in the documentation along with a html page for each implemented SGD.  
+
+Doc is generated as usual by running julia make.jl in the docs/src directory.  
+
 Further documentation can be found in docs of the Julia package, more in the doc of the Rust crate and at last the reference papers.
 
 ## Examples and tests
@@ -37,7 +44,7 @@ Examples are based on logisitc regression applied to digits MNIST database
 The data files can be downloaded from [MNIST](http://yann.lecun.com/exdb/mnist).
 The database has 60000 images of 784 pixels corresponding to
 handwritten digits form 0 to 9.  
-The logistic regression, with 10 classes,  is tested with the 3 algorithms and some comments are provided, comparing the results.
+The logistic regression, with 10 classes,  is tested with the 2 algorithms and some comments are provided, comparing the results.
 Times are obtained by launching twice the example to avoid the compilation time of the first pass.
 Run times are those obtained on a 4 hyperthreaded i7-cores laptop at 2.7Ghz
 
@@ -68,7 +75,9 @@ error at initial position: 2.3
 |  50     | 0.015  |  0.0015  |  0.25   |  0.39    |  18    |
 |  100    | 0.015  |  0.0015  |  0.25   |  0.32    |  36    |
 
-## Comparison with a Rust version
+## Rust version of this package
+
+There is also a Rust implementation of this package at [multigrad.rs](https://github.com/jean-pierreBoth/multistochgrad).  
 
 The Rust version has also an implementation of the SAG algorithm:
 
@@ -76,12 +85,12 @@ The Stochastic Averaged Gradient Descent as described in the paper:
 **"Minimizing Finite Sums with the Stochastic Average Gradient" (2013, 2016)**
 M.Schmidt, N.LeRoux, F.Bach.
 
-Here are some cpu-time comparisons :
+### cpu-time comparisons  
 
 Due to the different identifiability constraint the best result were not obtained with
-the same step but we have the same comportment with respect to the initial condition
-and equivalent results are obtained at about factor 1.5 in cpu-time. But
-the Logistic Regression needed the explicit use of BLAS interface to speed up vectorization.
+the same step size in gradient but we have the same behaviour with respect to the initial condition
+and equivalent results are obtained within a factor 2 in cpu-time. But
+the logistic regression needed the explicit use of BLAS interface to speed up vectorization.
 
 ## License
 

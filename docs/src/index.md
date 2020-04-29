@@ -7,6 +7,7 @@ CurrentModule = MultiStochGrad
 ## User types
 
 ```@docs
+Observations
 TermFunction
 TermGradient
 Evaluator

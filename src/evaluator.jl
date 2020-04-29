@@ -27,7 +27,6 @@ export Observations,
 
 For regressions problems for example length(datas) is number of observations.
     and length(datas[1]) is 1+dimension of observations data beccause of interception terms.
-
 """
 mutable struct Observations 
     # 
@@ -44,7 +43,7 @@ A structure grouping observations and an evaluation function
 
 The evaluation function must have signature: 
 
-    **Fn(observations: Observations, position: Array{Float64, N}, term : Int64) -> Float64**
+    Fn(observations: Observations, position: Array{Float64, N}, term : Int64) -> Float64
 
 ## Args:
 
@@ -55,22 +54,21 @@ The evaluation function must have signature:
 ## Fields
 
 - eval is a function of signature :  **Fn(Observations, Array{Float64, N}, Int64)::Float64**
-    taking as arguments (in this order): 
-        . observations
-        . position
-        . a term rank
+    taking as arguments (in this order):  
+        . observations  
+        . position  
+        . a term rank  
     it returns the value of the component of rank term in the sum of objective function
         at position position given in args
 
 - dims : characterize the dimensions on variable for which we do a minimization
         it is not the same as observations which is always a one dimensional array.
-        It is also the dimension of gradients we compute.
-
+        It is also the dimension of gradients we compute.  
         For example on a logistic regression with nbclass we used (Cf applis) dims = (d , nbclass-1)
         with d is lenght(observations) nbclass -1 beccause of solvability constraints.
 
 Note:
-    When instiantating a TermFunction you just write
+    When instiantating a TermFunction you just write:  
     *tf = TermFunction{typeof(yourfunction)}(yourfunction, obsrevations, dims)*
 
 """
@@ -138,11 +136,11 @@ This structure is the building block for all gradient computations
 ## Fields
 
 - eval is a function of signature Fn(Observations, Array{Float64,N}, Int64, Array{Float64,N}) 
-    taking as arguments (in this order): 
-        . observations
-        . position
-        . a term rank
-        . a vector for gradient to be returned in (it avoid reallocations as we loop on this function summing
+    taking as arguments (in this order):   
+        - observations  
+        - position  
+        - a term rank  
+        - a vector for gradient to be returned in (it avoid reallocations as we loop on this function summing
             the resulting Array on required terms). Array for gradient has the same dimension as array for position (...)
     
 - observations : the observations of the problem
@@ -296,7 +294,7 @@ end
 
 
 """
-# function function get_nbterms(evaluator::Evaluator{F,G}) where {F,G}
+# function get_nbterms(evaluator::Evaluator{F,G}) where {F,G}
 
 retrieves number of terms in the sum defining objective function
 """
