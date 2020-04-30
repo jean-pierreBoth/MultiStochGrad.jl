@@ -68,7 +68,7 @@ function get_batchsizeinfo(scsg_pb :: SCSG, batch_growing_factor :: Float64 , nb
     mini_batch_size = min(floor(Int64, scsg_pb.mini_batch_size_init * alfa_j), max_mini_batch_size)
     # m_j  computed to ensure mean number of mini batch < large_batch_size as mini_batch_size_init < large_batch_size_init is enfored
     nb_mini_batch_parameter = scsg_pb.m_zero * nbterms * alfa_j^1.5
-    step_size = scsg_pb.eta_zero / alfa_j
+    step_size = scsg_pb.eta_zero / sqrt(alfa_j)
     #
     BatchSizeInfo(iteration, large_batch_size, mini_batch_size, nb_mini_batch_parameter, step_size)
 end
@@ -151,6 +151,8 @@ The function has 3 types parameters F, G and N.
 
 """
 function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, initial_position::Array{Float64,N}) where {F,G,N}
+    @debug "scsg_pb" scsg_pb
+    #
     direction = zeros(Float64, size(initial_position))
     large_batch_gradient = zeros(Float64, size(initial_position))
     mini_batch_gradient_current = zeros(Float64, size(initial_position))
@@ -173,7 +175,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
 
         # get mean number  binomial law for number Nj of small batch iterations
         nb_mini_batch = get_nbminibatch(batch_info)
-        @info "batch info " batch_info.large_batchsize batch_info.mini_batchsize
+        @info "batch info " batch_info.large_batchsize batch_info.mini_batchsize nb_mini_batch batch_info.stepsize
         position_before_mini_batch = Array{Float64}(position)
         # loop on small batch iterations
         for i in 1:nb_mini_batch
@@ -184,6 +186,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
             direction = mini_batch_gradient_current - mini_batch_gradient_origin + large_batch_gradient;
             position = position - batch_info.stepsize * direction;
         end
+        @debug "norm L2 direction" norm(direction)
         value = compute_value(evaluation, position)
         @info "iteration  value " iteration value
         if iteration >= max_iterations 
