@@ -75,6 +75,18 @@ error at initial position: 2.3
 |  50     | 0.015  |  0.0015  |  0.25   |  0.39    |  18    |
 |  100    | 0.015  |  0.0015  |  0.25   |  0.32    |  36    |
 
+### SVRG logistic regression
+
+- initialization position : 9 images with *constant pixel = 0.0*,
+error at initial position: 2.3
+
+| nb iter |  nb mini batch     | step    | y value  | time(s) |
+|  ---    |     :---:          | ------  |   ----   |  ----  |
+|  50     |     500            |  0.05   |  0.28    |  23.5  |
+|  50     |     1000           |  0.05   |  0.264   |  24.5  |  
+|  50     |     2000           |  0.05   |  0.25    |  26    |  
+|  100     |    1000           |  0.05   |  0.253   |  49    |
+
 ## Rust version of this package
 
 There is also a Rust implementation of this package at [multigrad.rs](https://github.com/jean-pierreBoth/multistochgrad).  

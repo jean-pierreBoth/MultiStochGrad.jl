@@ -1,8 +1,27 @@
 # svrg implementation
 
+export SVRG
 
 """
 # struct SVRG
+
+The structure describing iterations for stochastic variance reduced gradient.
+
+## Method
+
+We have the following sequence:    
+   - a batch_gradient as the full gradient at current position  
+   - storing gradient and position before the mini batch sequence  
+   - then for `nb_mini_batch` :  
+       - uniform sampling of **one** term of the summation  
+       - computation of the gradient of the term at current position and the gradient
+                        at position before mini batch
+       - computation of direction of propagation as the batch gradient + gradient of term at current 
+                        position -  gradient of term at position before mini batch sequence
+       - update of position with adequate step size
+    
+   The step size used in the algorithm is constant and according to the ref paper it should be of the order of
+   L/4 where L is the lipschitz constant of the function to minimize
 """
 mutable struct SVRG 
     # number of minibatch of one term.
@@ -35,21 +54,6 @@ The function has 3 type parameters F, G and N:
 - max_iter : maximum number of iterations
 - initialposition : initial position of the iterations
 
-## Method
-
- We have the following sequence:    
-- a batch_gradient as the full gradient at current position  
-- storing gradient and position before the mini batch sequence  
-- then for `nb_mini_batch` :  
-    - uniform sampling of **one** term of the summation  
-    - computation of the gradient of the term at current position and the gradient
-                     at position before mini batch
-    - computation of direction of propagation as the batch gradient + gradient of term at current 
-                     position -  gradient of term at position before mini batch sequence
-    - update of position with adequate step size
- 
-The step size used in the algorithm is constant and according to the ref paper it should be of the order of
-L/4 where L is the lipschitz constant of the function to minimize
 """
 function minimize(svrgpb::SVRG, evaluation::Evaluator{F,G}, max_iterations, initial_position::Array{Float64,N}) where {F,G,N}
     direction = zeros(Float64, size(initial_position))
@@ -68,12 +72,11 @@ function minimize(svrgpb::SVRG, evaluation::Evaluator{F,G}, max_iterations, init
         compute_gradient!(evaluation, position ,full_batch_gradient)
         # get number of mini batch
         nb_mini_batch = svrgpb.nb_minibatch
-        @info "batch info " nb_mini_batch
         position_before_mini_batch = Array{Float64,N}(position)
         # loop on small batch iterations
         for i in 1:nb_mini_batch
             # sample mini batch terms
-            term = floor(nbterms * rand())
+            term = 1 + floor(Int64, nbterms * rand())
             compute_gradient!(evaluation, position , term, mini_batch_gradient_current)
             compute_gradient!(evaluation, position_before_mini_batch , term, mini_batch_gradient_origin)
             direction = mini_batch_gradient_current - mini_batch_gradient_origin + full_batch_gradient;

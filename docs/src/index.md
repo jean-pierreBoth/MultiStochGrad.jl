@@ -12,6 +12,7 @@ TermFunction
 TermGradient
 Evaluator
 SCSG
+SVRG
 ```
 
 ## Public Functions

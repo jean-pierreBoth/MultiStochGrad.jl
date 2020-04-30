@@ -13,6 +13,7 @@ global_logger(logger)
 
 
 include("scsg.jl")
+include("svrg.jl")
 
 include("applis/LinearRegression.jl")
 include("applis/LogisticRegression.jl")

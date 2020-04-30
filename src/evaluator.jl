@@ -284,6 +284,17 @@ function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,
 end
 
 
+
+"""
+# function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, gradient::Array{Float64,N}) where {F, G,N}
+
+This function compute a gradient Array at a given position summing over all terms
+"""
+function compute_gradient!(evaluator::Evaluator{F,G} , position :: Array{Float64,N}, gradient::Array{Float64,N}) where {F, G,N}
+    compute_gradient!(evaluator.compute_term_gradient, position, gradient)
+end
+
+
 """
 # function ompute_value(evaluator::Evaluator{F,G}, position :: Array{Float64,N}) where {F,G,N}
 
@@ -303,6 +314,9 @@ this function computes a value given an evaluator, and a position and a list of 
 function compute_value(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, terms::Vector{Int64})  where {F,G,N}
     compute_value(evaluator.compute_term_value, position, terms)
 end
+
+
+
 
 
 """
