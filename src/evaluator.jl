@@ -279,7 +279,6 @@ the function computes a gradient given an evaluator, a position, and a vector of
 
 """
 function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, terms::Vector{Int64}, gradient :: Array{Float64,N}) where {F,G,N}
-    @debug " in  compute_gradient!(evaluator::Evaluator, position : ...terms::Vector{Int64} " 
     compute_gradient!(evaluator.compute_term_gradient, position, terms, gradient)
 end
 

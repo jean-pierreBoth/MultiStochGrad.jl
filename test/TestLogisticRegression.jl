@@ -5,7 +5,6 @@ using MultiStochGrad
 using  LinearAlgebra, Test
 
 
-using BLAS
 using  LinearAlgebra, Test
 using Random, Distributions
 using Printf
@@ -53,18 +52,19 @@ function mnist_logistic_regression_scsg()
     nbclass = 10
     # struct LogisticRegression takes care of interceptions terms and constraint on first class
     # define TermFunction , TermGradient and Evaluator, dims is one less than number of classes for identifiability constraints
-    dims = Dims{2}((length(datas[1]) , nbclass-1))
+    dims = Dims{2}((length(observations.datas[1]) , nbclass-1))
     term_function =  TermFunction{typeof(logistic_term_value)}(logistic_term_value, observations, dims)
-    term_gradient2 = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,observations, dims)
-    evaluator = Evaluator{typeof(logistic_term_value),typeof(logistic_term_gradient)}(term_function, term_gradient2)
+    term_gradient = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,observations, dims)
+    evaluator = Evaluator{typeof(logistic_term_value),typeof(logistic_term_gradient)}(term_function, term_gradient)
     # define parameters for scsg
-    scsg_pb = SCSG(0.25, 0.0015, 1 , 0.015)
+    scsg_pb = SCSG(0.05, 0.0015, 1 , 0.03)
+    @debug "scsg_pb" scsg_pb
     # solve.
-    nb_iter = 50
-    initial_position= fill(0.0, dims)
+    nb_iter = 100
+    initial_position= fill(0.5, dims)
     @info "initial error " compute_value(evaluator, initial_position)
     @time position, value = minimize(scsg_pb, evaluator, nb_iter, initial_position)
-    @printf(stdout, "value = %f, position = %f %f %f ", value , position)
+    @printf(stdout, "value = %f, position = %f ", value , position)
 end
 
 
@@ -74,16 +74,16 @@ function mnist_logistic_regression_svrg()
     nbclass = 10
     # struct LogisticRegression takes care of interceptions terms and constraint on first class
     # define TermFunction , TermGradient and Evaluator, dims is one less than number of classes for identifiability constraints
-    dims = Dims{2}((length(datas[1]) , nbclass-1))
+    dims = Dims{2}((length(observations.datas[1]) , nbclass-1))
     term_function =  TermFunction{typeof(logistic_term_value)}(logistic_term_value, observations, dims)
-    term_gradient2 = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,observations, dims)
-    evaluator = Evaluator{typeof(logistic_term_value),typeof(logistic_term_gradient)}(term_function, term_gradient2)
+    term_gradient = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,observations, dims)
+    evaluator = Evaluator{typeof(logistic_term_value),typeof(logistic_term_gradient)}(term_function, term_gradient)
     # define parameters for svrg  1000 minibatch , step 0.02
-    svrg_pb = SVRG(1000, 0.02)
+    svrg_pb = SVRG(1000, 0.05)
     # solve.
     nb_iter = 100
     initial_position= fill(0.0, dims)
     @info "initial error " compute_value(evaluator, initial_position)
     @time position, value = minimize(svrg_pb, evaluator, nb_iter, initial_position)
-    @printf(stdout, "value = %f, position = %f %f %f ", value , position)
+    @printf(stdout, "value = %f, position = %f ", value , position)
 end
