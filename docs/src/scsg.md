@@ -40,7 +40,7 @@ We choose to let Bⱼ, mⱼ, bⱼ and ηⱼ evolve as:
        Bⱼ  :   B₀ * nbterms * alfa^(2j)
        mⱼ  :   m₀ * alfa^(3j/2)
        bⱼ  :   b₀ * alfa^j
-       ηⱼ  :   η₀ / alfa^j
+       ηⱼ  :   η₀ / alfa^(j/2)
      
      where alfa is computed to be slightly greater than 1.  
      α is chosen so that :   B₀ * α^(2*nbiter) = 1.
