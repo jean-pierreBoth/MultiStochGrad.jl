@@ -97,14 +97,21 @@ error at initial position: 2.3
 |  50     |     2000           |  0.05   |  0.25    |  27    |  
 |  100     |    1000           |  0.05   |  0.253   |  50    |
 
+### some comments on cpu-times
+
+All times were obtained withe @time macro.
 
 We see that SCSG is fast to reach a minimum of 0.28, it is more difficult to reach 0.26-0.27
 it nevertheless faster than SVRG.  
 The efficiency gain with respect to SVRG is not as important
-as with the *Rust* version (where we have a factor 2 in cpu-time) *probably* beccause our test use 60000
-observations, with SCSG we run at most on 6000 terms in a batch so, whick is not enough to compensate
-the overhead of threading. It should be more efficient in larger tests.
-Nevertheless the Julia version within a factor 1.5 or 2 of the Rust version.
+as with the *Rust* version (where we have a factor 2 in cpu-time) *probably* due to a multithreading effect.
+Our test use 60000 observations and SCSG run at most on 1/10 of the terms in a batch (i.e 6000 terms), on the constrary
+SVRG batches run on the full 60000 terms.  
+Batch sizes on SCSG are not large enough to fully benefit of the multithreading and
+its efficiency should be more evident on larger problems.  
+The logistic regression needed the explicit use of BLAS interface to speed up vectorization.
+
+*Nevertheless the Julia version runs within a factor 1.5 or 2 of the Rust version which seems a good compromise.*
 
 ## Rust version of this package
 
@@ -115,13 +122,6 @@ The Rust version has also an implementation of the SAG algorithm:
 The Stochastic Averaged Gradient Descent as described in the paper:
 **"Minimizing Finite Sums with the Stochastic Average Gradient" (2013, 2016)**
 M.Schmidt, N.LeRoux, F.Bach.
-
-### cpu-time comparisons  
-
-Due to the different identifiability constraint the best result were not obtained with
-the same step size in gradient but we have the same behaviour with respect to the initial condition
-and equivalent results are obtained within a factor 2 in cpu-time. But
-the logistic regression needed the explicit use of BLAS interface to speed up vectorization.
 
 ## License
 
