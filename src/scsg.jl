@@ -76,17 +76,41 @@ end
 
 # select sizeasked terms selected without replacement
 # returns the selected terms in a Vector{Int64}
-function samplewithoutreplacement(size_asked::Int64, terms:: UnitRange{Int64})
+function samplewithoutreplacement(size_asked::Int64, terms:: Vector{Int64})
     size_in = length(terms)
     out_terms = Vector{Int64}()
-    for t in terms 
-        if rand() * (size_in - t) < size_asked - length(out_terms)
-            push!(out_terms, t)
+    for i in 1:length(terms) 
+        if rand() * (size_in - i) < size_asked - length(out_terms)
+            push!(out_terms, terms[i])
         end
     end
     @assert size_asked == length(out_terms)
     out_terms 
 end
+
+
+# used to sample mini batches, Really faster.
+# See:
+#  1. Faster methods for Random Sampling J.S Vitter Comm ACM 1984
+#  2. Kim-Hung Li Reservoir Sampling Algorithms : Comm ACM Vol 20, 4 December 1994
+#  3. https://en.wikipedia.org/wiki/Reservoir_sampling
+
+function samplewithoutreplacement_reservoir(size_asked::Int64, in_terms::Vector{Int64})
+    out_terms = in_terms[1:size_asked]
+    w  = exp(log(rand()/(size_asked)))
+    s = size_asked+1
+    while s <= length(in_terms)
+        s = s + floor(Int64, log(rand())/log(1-w)) + 1
+        if s <= length(in_terms)
+            k = 1 + floor(Int64, size_asked * rand())
+            out_terms[k] = in_terms[s]
+            w = w * exp(log(rand())/size_asked)
+        end
+    end
+    out_terms
+end
+
+
 
 
 """
@@ -158,6 +182,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
     mini_batch_gradient_current = zeros(Float64, size(initial_position))
     mini_batch_gradient_origin = zeros(Float64, size(initial_position))
     nbterms = get_nbterms(evaluation)
+    all_index = collect(1:nbterms)
     batch_growing_factor = get_batchgrowingfactor(scsg_pb, max_iterations, nbterms)
     #
     position = Array{Float64}(initial_position)
@@ -169,7 +194,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
         batch_info = get_batchsizeinfo(scsg_pb, batch_growing_factor, nbterms, iteration)
         @debug "batch_info" batch_info
         # batch sampling
-        batch_indexes = samplewithoutreplacement(batch_info.large_batchsize, 1:nbterms)
+        batch_indexes = samplewithoutreplacement(batch_info.large_batchsize, all_index)
         # compute gradient on large batch index set and store initial position
         compute_gradient!(evaluation, position , batch_indexes, large_batch_gradient)
 
@@ -180,7 +205,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
         # loop on small batch iterations
         for i in 1:nb_mini_batch
             # sample mini batch terms
-            batch_indexes = samplewithoutreplacement(batch_info.mini_batchsize, 1:nbterms)
+            batch_indexes = samplewithoutreplacement_reservoir(batch_info.mini_batchsize, all_index)
             compute_gradient!(evaluation, position , batch_indexes, mini_batch_gradient_current)
             compute_gradient!(evaluation, position_before_mini_batch , batch_indexes, mini_batch_gradient_origin)
             direction = mini_batch_gradient_current - mini_batch_gradient_origin + large_batch_gradient;

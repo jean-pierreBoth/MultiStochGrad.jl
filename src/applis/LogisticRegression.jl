@@ -63,7 +63,6 @@ function logistic_term_gradient(observations:: Observations, position:: Array{Fl
             gradient[:,k] .= gradient[:,k] .- obs_term
         end
     end
-    @debug "exiting logistic_term_gradient"
 end
 
 

@@ -62,21 +62,30 @@ error at initial position: 8.88
 
 | nb iter | B_0    |   m_0    | step_0  | y value | time(s) |
 |  :---:  | :---:  |  :-----: | :----:  |   ----  |  ----   |
-| 100     | 0.03   |  0.0015  |  0.1    |  0.29   |  33.    |
-|  50     | 0.015  |  0.0015  |  0.1    |  0.32   |  17.8   |
-|  50     | 0.02   |  0.002   |  0.1    |  0.31   |  20.    |
-|  50     | 0.02   |  0.003   |  0.1    |  0.295  |  27     |
+|  50     | 0.015  |  0.003   |  0.1    |  0.296  |  11.8   |
+|  50     | 0.02   |  0.004   |  0.1    |  0.29   |  13.3   |
+|  50     | 0.02   |  0.006   |  0.1    |  0.28   |  16.5   |
+|  70     | 0.02   |  0.006   |  0.1    |  0.27   |  23.8   |
 
 - initialization position : 9 images with *constant pixel = 0.0*,
 error at initial position: 2.3
 
 | nb iter | B_0    |   m_0    | step_0  | y value  | time(s) |
-|  ---    |----    |  ----    | ------  |   ----   |  ----  |
-|  50     | 0.015  |  0.0015  |  0.1    |  0.30    |  17    |
-|  50     | 0.02   |  0.002   |  0.1    |  0.294   |  21    |
-|  100    | 0.02   |  0.002   |  0.1    |  0.276   |  42    |
+|  ---    | :----: |  ----    | ------  |   ----   |  ----  |
+|  50     | 0.015  |  0.003   |  0.1    |  0.286   |  12    |
+|  50     | 0.02   |  0.004   |  0.1    |  0.28    |  13.5  |
+|  50     | 0.02   |  0.006   |  0.1    |  0.276   |  16.5  |
+|  100    | 0.02   |  0.004   |  0.1    |  0.266   |  26    |
 
 ### SVRG logistic regression
+
+- initialization position : 9 images with *constant pixel = 0.5*,
+error at initial position: 2.3
+
+| nb iter |  nb mini batch     | step    | y value  | time(s) |
+|  ---    |     :---:          | ------  |   ----   |  ----   |
+|  50     |     1000           |  0.05   |  0.269   |  28     |  
+|  50     |     2000           |  0.05   |  0.255   |  29     |  
 
 - initialization position : 9 images with *constant pixel = 0.0*,
 error at initial position: 2.3
@@ -88,13 +97,14 @@ error at initial position: 2.3
 |  50     |     2000           |  0.05   |  0.25    |  27    |  
 |  100     |    1000           |  0.05   |  0.253   |  50    |
 
-- initialization position : 9 images with *constant pixel = 0.5*,
-error at initial position: 2.3
 
-| nb iter |  nb mini batch     | step    | y value  | time(s) |
-|  ---    |     :---:          | ------  |   ----   |  ----   |
-|  50     |     1000           |  0.05   |  0.269   |  28     |  
-|  50     |     2000           |  0.05   |  0.255   |  29     |  
+We see that SCSG is fast to reach a minimum of 0.28, it is more difficult to reach 0.26-0.27
+it nevertheless faster than SVRG.  
+The efficiency gain with respect to SVRG is not as important
+as with the *Rust* version (where we have a factor 2 in cpu-time) *probably* beccause our test use 60000
+observations, with SCSG we run at most on 6000 terms in a batch so, whick is not enough to compensate
+the overhead of threading. It should be more efficient in larger tests.
+Nevertheless the Julia version within a factor 1.5 or 2 of the Rust version.
 
 ## Rust version of this package
 
