@@ -80,7 +80,7 @@ error at initial position: 2.3
 ### SVRG logistic regression
 
 - initialization position : 9 images with *constant pixel = 0.5*,
-error at initial position: 2.3
+error at initial position: 8.88
 
 | nb iter |  nb mini batch     | step    | y value  | time(s) |
 |  ---    |     :---:          | ------  |   ----   |  ----   |
@@ -105,8 +105,7 @@ We see that SCSG is fast to reach a minimum of 0.28, it is more difficult to rea
 it nevertheless faster than SVRG.  
 The efficiency gain with respect to SVRG is not as important
 as with the *Rust* version (where we have a factor 2 in cpu-time) *probably* due to a multithreading effect.
-Our test use 60000 observations and SCSG run at most on 1/10 of the terms in a batch (i.e 6000 terms), on the constrary
-SVRG batches run on the full 60000 terms.  
+Our test use 60000 observations and SCSG run at most on 1/10 of the terms in a batch (i.e 6000 terms), on the constrary SVRG batches run on the full 60000 terms.  
 Batch sizes on SCSG are not large enough to fully benefit of the multithreading and
 its efficiency should be more evident on larger problems.  
 The logistic regression needed the explicit use of BLAS interface to speed up vectorization.
