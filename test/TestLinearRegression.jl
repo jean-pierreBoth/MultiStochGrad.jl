@@ -35,13 +35,13 @@ function test_linear_regression_scsg()
     term_function =  TermFunction{typeof(linear_reg_term_value)}(linear_reg_term_value, observations, Dims{1}(3))
     term_gradient2 = TermGradient{typeof(linear_reg_term_gradient)}(linear_reg_term_gradient ,observations, Dims{1}(3))
     evaluator = Evaluator{typeof(linear_reg_term_value),typeof(linear_reg_term_gradient)}(term_function,term_gradient2) 
-    scsg_pb = SCSG(0.1, 0.1, 5 , 0.95)
+    scsg_pb = SCSG(0.1, 0.1, 1 , 0.95)
     # solve.
-    nb_iter = 65
+    nb_iter = 50
     position = fill(1., 3)
     position, value = minimize(scsg_pb, evaluator, nb_iter, position)
     @printf(stdout, "value = %f, position = %f %f %f ", value , position[1], position[2], position[3])
-    value < 0.5 ? true : false
+    value < 0.56 ? true : false
 end
 
 
@@ -66,11 +66,11 @@ function test_linear_regression_svrg()
     term_function =  TermFunction{typeof(linear_reg_term_value)}(linear_reg_term_value, observations, Dims{1}(3))
     term_gradient = TermGradient{typeof(linear_reg_term_gradient)}(linear_reg_term_gradient ,observations, Dims{1}(3))
     evaluator = Evaluator{typeof(linear_reg_term_value),typeof(linear_reg_term_gradient)}(term_function,term_gradient) 
-    svrg_pb = SVRG(25, 0.1)
+    svrg_pb = SVRG(50, 0.1)
     # solve.
-    nb_iter = 65
+    nb_iter = 50
     position = fill(1., 3)
     position, value = minimize(svrg_pb, evaluator, nb_iter, position)
     @printf(stdout, "value = %f, position = %f %f %f ", value ,  position[1], position[2], position[3])
-    value < 0.5 ? true : false
+    value < 0.56 ? true : false
 end
