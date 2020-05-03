@@ -98,7 +98,7 @@ end
 function samplewithoutreplacement_reservoir(size_asked::Int64, in_terms::Vector{Int64})
     out_terms = in_terms[1:size_asked]
     w  = exp(log(rand()/(size_asked)))
-    s = size_asked+1
+    s = size_asked
     while s <= length(in_terms)
         s = s + floor(Int64, log(rand())/log(1-w)) + 1
         if s <= length(in_terms)

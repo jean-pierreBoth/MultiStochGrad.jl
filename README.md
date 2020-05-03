@@ -99,15 +99,27 @@ error at initial position: 2.3
 
 ### some comments on cpu-times
 
-All times were obtained withe @time macro.
+All times were obtained withe @time macro and julia running with JULIA_NUM_THREADS = 8.
 
 We see that SCSG is fast to reach a minimum of 0.28, it is more difficult to reach 0.26-0.27
 it nevertheless faster than SVRG.  
 The efficiency gain with respect to SVRG is not as important
-as with the *Rust* version (where we have a factor 2 in cpu-time) *probably* due to a multithreading effect.
+as with the *Rust* version (where we have a factor 2 in cpu-time) **due to a multithreading effect**.
 Our test use 60000 observations and SCSG run at most on 1/10 of the terms in a batch (i.e 6000 terms), on the constrary SVRG batches run on the full 60000 terms.  
-Batch sizes on SCSG are not large enough to fully benefit of the multithreading and
-its efficiency should be more evident on larger problems.  
+Batch sizes on SCSG are not large enough to fully benefit of the multithreading.
+This can be verified by setting JULIA_NUM_THREADS = 1 and compare how SCSG and SVRG timing benefit from
+the threading:
+
+We did 2  checks with initial conditions set to pixel = 0.5 and compared with previous results:
+
+- For SCSG we ran the case with parameters (70, 0.02, 0.006, 0.1 )  corresponding to last line of first array of results. We had with 8 threads y=0.27 in 23.8 s , and with one thread we obtain y=0.27 in 40s, so the threading gives us less than a factor 2.
+
+- For SVRG we ran the case with parameters (50,1000, 0.05) corresponding to the first line of first array of result for SVRG. We had y=0.269 with 28s, and with one thread we need 72s. Here the treading
+give us a gain of 3.
+
+So SCSG  efficiency should be more evident on larger problems or with a lighter threading system. Recall
+that the threading in Julia is still young.
+
 The logistic regression needed the explicit use of BLAS interface to speed up vectorization.
 
 *Nevertheless the Julia version runs within a factor 1.5 or 2 of the Rust version which seems a good compromise.*
