@@ -1,4 +1,4 @@
-using MultoStochGrad, Test
+using MultiStochGrad, Test
 
 
 using Logging
