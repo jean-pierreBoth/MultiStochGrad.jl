@@ -12,6 +12,7 @@ using Printf
 
 include("../src/applis/LogisticRegression.jl")
 
+include("../src/svrg.jl")
 include("../src/scsg.jl")
 include("../src/mnist.jl")
 
@@ -57,10 +58,10 @@ function mnist_logistic_regression_scsg()
     term_gradient = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,observations, dims)
     evaluator = Evaluator{typeof(logistic_term_value),typeof(logistic_term_gradient)}(term_function, term_gradient)
     # define parameters for scsg
-    scsg_pb = SCSG(0.05, 0.0015, 1 , 0.03)
+    scsg_pb = SCSG(0.1, 0.006, 1 , 0.02)
     @debug "scsg_pb" scsg_pb
     # solve.
-    nb_iter = 100
+    nb_iter = 70
     initial_position= fill(0.5, dims)
     @info "initial error " compute_value(evaluator, initial_position)
     @time position, value = minimize(scsg_pb, evaluator, nb_iter, initial_position)
@@ -81,8 +82,8 @@ function mnist_logistic_regression_svrg()
     # define parameters for svrg  1000 minibatch , step 0.02
     svrg_pb = SVRG(1000, 0.05)
     # solve.
-    nb_iter = 100
-    initial_position= fill(0.0, dims)
+    nb_iter = 50
+    initial_position= fill(0.5, dims)
     @info "initial error " compute_value(evaluator, initial_position)
     @time position, value = minimize(svrg_pb, evaluator, nb_iter, initial_position)
     @printf(stdout, "value = %f, position = %f ", value , position)
