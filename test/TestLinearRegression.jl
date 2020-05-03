@@ -41,6 +41,7 @@ function test_linear_regression_scsg()
     position = fill(1., 3)
     position, value = minimize(scsg_pb, evaluator, nb_iter, position)
     @printf(stdout, "value = %f, position = %f %f %f ", value , position)
+    value < 0.5 ? true : false
 end
 
 
@@ -71,4 +72,5 @@ function test_linear_regression_svrg()
     position = fill(1., 3)
     position, value = minimize(svrg_pb, evaluator, nb_iter, position)
     @printf(stdout, "value = %f, position = %f %f %f ", value , position)
+    value < 0.5 ? true : false
 end
