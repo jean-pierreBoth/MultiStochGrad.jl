@@ -170,7 +170,6 @@ the function that dispatch to TermGradient do do the actual gradient computation
 
 """
 function compute_gradient!(termg::TermGradient{G}, position::Array{Float64,N} , term:: Int64, gradient:: Array{Float64,N}) where {G,N}
-    @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Int64 " 
     termg.eval(termg.observations, position, term, gradient)
 end
 
@@ -188,7 +187,6 @@ It is multithreaded and computes gradient by blocks of 1500 terms.
 
 """
 function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N}, terms::Vector{Int64}, gradient::Array{Float64,N}) where {G,N}
-#        @debug " in  compute_gradient!(termg::TermGradient, position : ...terms::Vector{Int64} "
         # 
         batchsize=1500
         nbterms = length(terms)
@@ -266,7 +264,6 @@ the function computed gradient given an evaluator, a position, and a term
 
 """
 function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, term::Int64 , gradient :: Array{Float64,N}) where {F,G,N}
-    @debug " in  compute_gradient!(evaluator::Evaluator, position : ...terms::Int64 " 
     compute_gradient!(evaluator.compute_term_gradient, position, term, gradient)
 end
 
