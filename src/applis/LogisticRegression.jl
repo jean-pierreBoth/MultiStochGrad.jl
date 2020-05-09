@@ -10,9 +10,12 @@ using LinearAlgebra
 """
 # function term_value(observations:: Observations, position:: Array{Float64}, term :: Int64)
 
-Our position data is encoded in an array of diemsnsion (nbclass - 1 ,  1 + length of an observation)
+Our position data x is encoded in an Array{Float64,2} of size (1 + length of an observation, nbclass_1).
+
+If x is our position with k indexing a class and position[:,k] a vector, 
+the value if term i is given by
 ```math
- term value = log(1+\\sum_{1}^{K-1} exp(a_{i} \\dot x_{k})) - \\sum_{k=1}^{K-1} 1_{y_{i}=k} a_{i} \\dot x_{k}
+ value_{i} = log(1+\\sum_{1}^{K-1} exp(a_{i} \\cdot x_{k})) - \\sum_{k=1}^{K-1} 1_{(y_{i}=k)} a_{i} \\cdot x_{k}
 ```
 """
 function logistic_term_value(observations:: Observations, position:: Array{Float64,2}, term :: Int64)
@@ -38,13 +41,17 @@ end
 
 
 """
-# function logistic_term_gradient(observations:: Observations, position:: Array{Float64,2}, 
-        term :: Int64, gradient ::  Array{Float64,2})
+# function logistic\\_term\\_gradient(observations:: Observations, position:: Array{Float64,2}, term :: Int64, gradient ::  Array{Float64,2})
+
+The gradient of term i is given by the array dependant on column index k, and line index j:
+```math
+\\frac{a_{i}^{j} * exp(a_{i} \\cdot x_{k})}{1+\\sum_{1}^{K-1} exp(a_{i} \\cdot x_{k})} - 1_{(y_{i}=k)} * a_{i}^{j}
+```
 
 
 """
 function logistic_term_gradient(observations:: Observations, position:: Array{Float64,2}, 
-                term :: Int64, gradient ::  Array{Float64,2})
+            term :: Int64, gradient ::  Array{Float64,2})
     #
     dims = size(position)
     nbclass = dims[2]
