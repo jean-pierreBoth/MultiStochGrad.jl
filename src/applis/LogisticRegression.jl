@@ -2,7 +2,6 @@
 
 using LinearAlgebra
 
-include("../evaluator.jl")
 
 
 
@@ -11,7 +10,7 @@ include("../evaluator.jl")
 """
 # function term_value(observations:: Observations, position:: Array{Float64}, term :: Int64)
 
-The dimension of our position vector is (nbclass - 1 ,  1 + length of an observation
+Our position data is encoded in an array of diemsnsion (nbclass - 1 ,  1 + length of an observation)
 ```math
  term value = log(1+\\sum_{1}^{K-1} exp(a_{i} \\dot x_{k})) - \\sum_{k=1}^{K-1} 1_{y_{i}=k} a_{i} \\dot x_{k}
 ```
@@ -37,6 +36,13 @@ function logistic_term_value(observations:: Observations, position:: Array{Float
 end
 
 
+
+"""
+# function logistic_term_gradient(observations:: Observations, position:: Array{Float64,2}, 
+        term :: Int64, gradient ::  Array{Float64,2})
+
+
+"""
 function logistic_term_gradient(observations:: Observations, position:: Array{Float64,2}, 
                 term :: Int64, gradient ::  Array{Float64,2})
     #

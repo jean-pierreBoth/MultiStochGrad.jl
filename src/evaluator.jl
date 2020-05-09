@@ -178,7 +178,7 @@ end
 """
 # function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N}, terms::Vector{Int64}, gradient::Array{Float64,N}) where {G,N}
 
-This function compute a gradient Array at a given position summing over all terms passed as arg.
+This function computes a gradient Array at a given position summing over all terms passed as arg.
 
 NOTA: It must be noted that this function computes the mean of gradients returned by gradient returned on each term.
 So that the gradient computed on a batch is an estimator of the gradient computed on the whole objective function.
@@ -219,7 +219,7 @@ end
 """
 # function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N}, gradient::Array{Float64,N}) where {G,N}
 
-This function compute a gradient Array at a given position summing over all terms
+This function computes a gradient Array at a given position summing over all terms
 """
 function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N}, gradient::Array{Float64,N}) where {G,N}
     nbterms = length(termg.observations.datas)
@@ -260,7 +260,7 @@ end
 # function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, term::Int64 , gradient :: Array{Float64,N}) where {F,G,N}
 
 
-the function computed gradient given an evaluator, a position, and a term
+the function computes gradient given an evaluator, a position, and a term
 
 """
 function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, term::Int64 , gradient :: Array{Float64,N}) where {F,G,N}
@@ -284,7 +284,7 @@ end
 """
 # function compute_gradient!(evaluator::Evaluator{F,G}, position :: Array{Float64,N}, gradient::Array{Float64,N}) where {F, G,N}
 
-This function compute a gradient Array at a given position summing over all terms
+This function computes a gradient Array at a given position summing over all terms
 """
 function compute_gradient!(evaluator::Evaluator{F,G} , position :: Array{Float64,N}, gradient::Array{Float64,N}) where {F, G,N}
     compute_gradient!(evaluator.compute_term_gradient, position, gradient)
