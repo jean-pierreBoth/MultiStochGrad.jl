@@ -1,5 +1,6 @@
 module mnist
 
+using Statistics
 
 
 # big endian (network order) !!! must use ntoh(x)
@@ -65,13 +66,13 @@ end
 
 
 function getImages(mnist::MnistData , label::UInt8)
-    idx=find(x-> x==label, mnist.labels)
+    idx=findall(x-> x==label, mnist.labels)
     return mnist.images[:,:,idx]
 end
 
 
 function getMeanImageLabel(mnist::MnistData,  label::UInt8)
-    idx=find(x-> x==label, mnist.labels)
+    idx=findall(x-> x==label, mnist.labels)
     meanIL=zeros(Float64, mnist.images[:,:,1])
     meanIL = mean(mnist.images[:,:,idx],3)
     meanIL[:,:,1]

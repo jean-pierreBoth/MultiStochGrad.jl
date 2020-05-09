@@ -16,7 +16,6 @@ The dimension of our position vector is (nbclass - 1 ,  1 + length of an observa
  term value = log(1+\\sum_{1}^{K-1} exp(a_{i} \\dot x_{k})) - \\sum_{k=1}^{K-1} 1_{y_{i}=k} a_{i} \\dot x_{k}
 ```
 """
-
 function logistic_term_value(observations:: Observations, position:: Array{Float64,2}, term :: Int64)
     #
     dims = size(position)
