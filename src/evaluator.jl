@@ -3,7 +3,7 @@
 
 
 
-# we export here, so every submodule including this file gets visibility
+#
 export Observations,
     TermFunction,
     compute_value,
@@ -12,9 +12,6 @@ export Observations,
     Evaluator,
     get_nbterms
 
-
-
-    
 """
 
 # Observations
@@ -23,13 +20,17 @@ export Observations,
 ## Fields
 
 - datas : list of data vector one for each observations
-- value\\_at\\_datas
+- value_at_datas
 For regressions problems for example length(datas) is number of observations.
     and length(datas[1]) is 1+dimension of observations data beccause of interception terms.
 """
 mutable struct Observations 
     datas :: Vector{Vector{Float64}}
     value_at_data :: Vector{Float64}
+    #
+    function Observations(datas::Vector{Vector{Float64}}, values::Vector{Float64})
+        new(datas, value_at_data)
+    end
 end
 
 

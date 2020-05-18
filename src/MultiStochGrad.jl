@@ -20,7 +20,19 @@ include("applis/LogisticRegression.jl")
 
 # export list
 
-
-
+export Observations,
+    TermFunction,
+    compute_value,
+    TermGradient,
+    compute_gradient!,
+    Evaluator,
+    get_nbterms,
+    # from scsg
+    SCSG,
+    minimize,
+    BatchSizeInfo,
+    get_batchsizeinfo,
+    #
+    SVRG
 end
 
