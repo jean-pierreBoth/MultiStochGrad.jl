@@ -17,10 +17,10 @@ This is the structure describing parameters used in Stochastic Controlled Stocha
 
 ## Fields
 
-- eta_zero :
-- m_zero :
-- mini_batch_size_init :
-- large_batch_size_init :
+- eta_zero : initial step size
+- m_zero : fraction of terms to consider in initialisation of the number of mini batch to run for each large batch (mⱼ)
+- mini\_batch\_size\_init : governs size of mini batches (1 is a good initialization)
+- large\_batch\_size\_init : fraction of terms to consider in initialisation of large batch size
 
 """
 mutable struct SCSG

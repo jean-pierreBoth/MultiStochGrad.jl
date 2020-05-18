@@ -26,3 +26,10 @@ The various functions associated to **struct Evaluator{F,G}** provide paralleliz
 
 The function **minimize** runs the various gradient algorithms by being provided the arguments
 describing the algorithm to run and the evaluations functions.
+
+## Examples and Tests
+
+In the applis directory there are 2 examples implementing the functions necessary for initializing **struct TermFunction**
+and **struct TermGradient{G}** for linear and logistic regressions.
+They are used in the test directory. The file *mnist.jl* provides the code to read the data necessary used in the logistic regression test. To run the logistic regression test download the data files from [MNIST](http://yann.lecun.com/exdb/mnist) and
+modify path accordingly in file **TestLogisticRegression.jl**

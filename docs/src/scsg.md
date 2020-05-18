@@ -35,7 +35,7 @@ With the following notations:
 - nbiter : the maximum number of iterations
 - j : the iteration number
 
-We choose to let Bⱼ, mⱼ, bⱼ and ηⱼ evolve as: 
+We choose to let Bⱼ, mⱼ, bⱼ and ηⱼ evolve as:
 
        Bⱼ  :   B₀ * nbterms * alfa^(2j)
        mⱼ  :   m₀ * alfa^(3j/2)

@@ -23,13 +23,12 @@ export Observations,
 ## Fields
 
 - datas : list of data vector one for each observations
-- value_at_data : value for each observations
+- value\_at\_data : value for each observations
 
 For regressions problems for example length(datas) is number of observations.
     and length(datas[1]) is 1+dimension of observations data beccause of interception terms.
 """
 mutable struct Observations 
-    # 
     datas :: Vector{Vector{Float64}}
     value_at_data :: Vector{Float64}
 end
@@ -166,7 +165,7 @@ end
 # function compute_gradient!(termg::TermGradient{G}, position::Array{Float64,N} , term:: Int64, gradient:: Array{Float64,N}) where {G,N}
 
 
-the function that dispatch to TermGradient do do the actual gradient computation for a term.
+the function  dispatches to TermGradient  the actual gradient computation for a term.
 
 """
 function compute_gradient!(termg::TermGradient{G}, position::Array{Float64,N} , term:: Int64, gradient:: Array{Float64,N}) where {G,N}
@@ -292,7 +291,7 @@ end
 
 
 """
-# function ompute_value(evaluator::Evaluator{F,G}, position :: Array{Float64,N}) where {F,G,N}
+# function compute_value(evaluator::Evaluator{F,G}, position :: Array{Float64,N}) where {F,G,N}
 
 this function computes a value given an evaluator, and a position using all terms
 """
