@@ -16,4 +16,9 @@ include("TestLinearRegression.jl")
 end
 
 # possibly  after download of mnist files
-# include("TestLogisticRegression.jl")
+include("TestLogisticRegression.jl")
+
+@testset "logistic_reg" begin
+@test mnist_logistic_regression_svrg()
+@test mnist_logistic_regression_svrg()
+end

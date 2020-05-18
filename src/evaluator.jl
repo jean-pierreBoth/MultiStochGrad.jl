@@ -3,15 +3,6 @@
 
 
 
-#
-export Observations,
-    TermFunction,
-    compute_value,
-    TermGradient,
-    compute_gradient!,
-    Evaluator,
-    get_nbterms
-
 """
 
 # Observations
@@ -29,7 +20,7 @@ mutable struct Observations
     value_at_data :: Vector{Float64}
     #
     function Observations(datas::Vector{Vector{Float64}}, values::Vector{Float64})
-        new(datas, value_at_data)
+        new(datas, values)
     end
 end
 

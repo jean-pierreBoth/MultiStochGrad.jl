@@ -12,8 +12,6 @@ using Printf
 
 include("../src/applis/LogisticRegression.jl")
 
-include("../src/svrg.jl")
-include("../src/scsg.jl")
 include("../src/mnist.jl")
 
 const IMAGE_FNAME_STR  = "/home.1/jpboth/Data/MNIST/train-images-idx3-ubyte"
@@ -23,8 +21,8 @@ const LABEL_FNAME_STR  = "/home.1/jpboth/Data/MNIST/train-labels-idx1-ubyte"
 function initMnitObservations()
     # check path and load
     if !isfile(IMAGE_FNAME_STR) || !isfile(LABEL_FNAME_STR)
-        @warn("mnist_logistic_regression : bad path to mnist data file")
-        return false
+        @warn("\n\n mnist_logistic_regression : bad path to mnist data file, cannot do tests, download and install files")
+        exit(1)
     end
     mnistdata = mnist.MnistData(IMAGE_FNAME_STR, LABEL_FNAME_STR)
     # transform data into logistic regression problem
@@ -49,6 +47,7 @@ end
 
 
 function mnist_logistic_regression_scsg()
+    @printf(stdout, "\n\n\n begining mnist_logistic_regression_scsg ...")
     observations= initMnitObservations()
     nbclass = 10
     # struct LogisticRegression takes care of interceptions terms and constraint on first class
@@ -63,14 +62,18 @@ function mnist_logistic_regression_scsg()
     # solve.
     nb_iter = 70
     initial_position= fill(0.5, dims)
-    @info "initial error " compute_value(evaluator, initial_position)
+    initial_error = compute_value(evaluator, initial_position)
+    @info "initial error " initial_error
     @time position, value = minimize(scsg_pb, evaluator, nb_iter, initial_position)
-    @printf(stdout, "value = %f, position = %f ", value , position)
+    @printf(stdout, "value = %f", value)
+    @printf(stdout, "\n\n mnist_logistic_regression_scsg done")
+    value < 0.3 ? true : false
 end
 
 
 
 function mnist_logistic_regression_svrg()
+    @printf(stdout, "\n\n\n begining mnist_logistic_regression_svrg ...")
     observations= initMnitObservations()
     nbclass = 10
     # struct LogisticRegression takes care of interceptions terms and constraint on first class
@@ -84,7 +87,10 @@ function mnist_logistic_regression_svrg()
     # solve.
     nb_iter = 50
     initial_position= fill(0.5, dims)
-    @info "initial error " compute_value(evaluator, initial_position)
+    initial_error = compute_value(evaluator, initial_position)
+    @info "initial error " initial_error
     @time position, value = minimize(svrg_pb, evaluator, nb_iter, initial_position)
-    @printf(stdout, "value = %f, position = %f ", value , position)
+    @printf(stdout, "value = %f", value)
+    @printf(stdout, "\n\n mnist_logistic_regression_svrg done")
+    value < 0.3 ? true : false
 end

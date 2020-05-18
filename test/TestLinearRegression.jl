@@ -9,8 +9,6 @@ using Printf
 
 include("../src/applis/LinearRegression.jl")
 
-include("../src/scsg.jl")
-include("../src/svrg.jl")
 
 # the . means we use the module LinearRegressionMod in the current module, other wise refer toa package!
 
@@ -41,6 +39,7 @@ function test_linear_regression_scsg()
     position = fill(1., 3)
     position, value = minimize(scsg_pb, evaluator, nb_iter, position)
     @printf(stdout, "value = %f, position = %f %f %f ", value , position[1], position[2], position[3])
+    @printf(stdout, "\n\n test_linear_regression_scsg done \n \n")
     value < 0.56 ? true : false
 end
 
@@ -72,5 +71,6 @@ function test_linear_regression_svrg()
     position = fill(1., 3)
     position, value = minimize(svrg_pb, evaluator, nb_iter, position)
     @printf(stdout, "value = %f, position = %f %f %f ", value ,  position[1], position[2], position[3])
+    @printf(stdout, "\n\n test_linear_regression_svrg done \n \n")
     value < 0.56 ? true : false
 end
