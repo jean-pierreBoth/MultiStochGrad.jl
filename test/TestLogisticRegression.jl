@@ -66,7 +66,7 @@ function mnist_logistic_regression_scsg()
     @info "initial error " initial_error
     @time position, value = minimize(scsg_pb, evaluator, nb_iter, initial_position)
     @printf(stdout, "value = %f", value)
-    @printf(stdout, "\n\n mnist_logistic_regression_scsg done")
+    @printf(stdout, "\n\n mnist_logistic_regression_scsg done \n")
     value < 0.3 ? true : false
 end
 
@@ -83,7 +83,7 @@ function mnist_logistic_regression_svrg()
     term_gradient = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,observations, dims)
     evaluator = Evaluator{typeof(logistic_term_value),typeof(logistic_term_gradient)}(term_function, term_gradient)
     # define parameters for svrg  1000 minibatch , step 0.02
-    svrg_pb = SVRG(1000, 0.05)
+    svrg_pb = SVRG(2000, 0.05)
     # solve.
     nb_iter = 50
     initial_position= fill(0.5, dims)
@@ -91,6 +91,6 @@ function mnist_logistic_regression_svrg()
     @info "initial error " initial_error
     @time position, value = minimize(svrg_pb, evaluator, nb_iter, initial_position)
     @printf(stdout, "value = %f", value)
-    @printf(stdout, "\n\n mnist_logistic_regression_svrg done")
+    @printf(stdout, "\n\n mnist_logistic_regression_svrg done \n")
     value < 0.3 ? true : false
 end
