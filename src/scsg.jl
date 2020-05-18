@@ -19,8 +19,8 @@ This is the structure describing parameters used in Stochastic Controlled Stocha
 
 - eta_zero : initial step size
 - m_zero : fraction of terms to consider in initialisation of the number of mini batch to run for each large batch (mⱼ)
-- mini\_batch\_size\_init : governs size of mini batches (1 is a good initialization)
-- large\_batch\_size\_init : fraction of terms to consider in initialisation of large batch size
+- mini\\_batch\\_size\\_init : governs size of mini batches (1 is a good initialization)
+- large\\_batch\\_size\\_init : fraction of terms to consider in initialisation of large batch size
 
 """
 mutable struct SCSG
@@ -161,7 +161,7 @@ Generic function used in minimisations for all algorithms.
 The function has 3 types parameters F, G and N. 
 
 - F and G corresponds to the types of function used in instantiating the structure TermFunction{F} and TermmGradient{G}
-(see in test and examples directores the cases: TestLinearRegression or TestLogisticRegression). 
+(see in test and examples directories the cases: TestLinearRegression or TestLogisticRegression). 
 
 - N is the dimension of array for searched parameters (position and gradients) which depends upon the problem and the way we modelize it.
 (See Logistic regression where we used N=2)

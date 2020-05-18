@@ -23,8 +23,7 @@ export Observations,
 ## Fields
 
 - datas : list of data vector one for each observations
-- value\_at\_data : value for each observations
-
+- value\\_at\\_datas
 For regressions problems for example length(datas) is number of observations.
     and length(datas[1]) is 1+dimension of observations data beccause of interception terms.
 """
@@ -40,31 +39,26 @@ end
 
 A structure grouping observations and an evaluation function
 
-The evaluation function must have signature: 
-
-    Fn(observations: Observations, position: Array{Float64, N}, term : Int64) -> Float64
-
-## Args:
-
-- position : is position we want the function value at.
-
-- term : the rank of term in sum representing objective function
-
 ## Fields
 
-- eval is a function of signature :  **Fn(Observations, Array{Float64, N}, Int64)::Float64**
-    taking as arguments (in this order):  
-        . observations  
-        . position  
-        . a term rank  
-    it returns the value of the component of rank term in the sum of objective function
-        at position position given in args
+- eval is a function of signature   **Fn(Observations, Array{Float64, N}, Int64)::Float64** 
+    taking as arguments (in this order):
+    - observations     
+    - position    
+    - a term rank    
+
+    This function returns the value of the component of rank term in the sum of objective function
+        at position position given in args  
+
+- observations
 
 - dims : characterize the dimensions on variable for which we do a minimization
-        it is not the same as observations which is always a one dimensional array.
-        It is also the dimension of gradients we compute.  
-        For example on a logistic regression with nbclass we used (Cf applis) dims = (d , nbclass-1)
-        with d is lenght(observations) nbclass -1 beccause of solvability constraints.
+    It is not the same as observations which is always a one dimensional array.  
+
+    For example on a logistic regression with nbclass we used (Cf applis) dims = (d , nbclass-1)
+    with *d* the length(observations) and nbclass -1 beccause of solvability constraints.  
+
+    It is also the dimension of gradients we compute.  
 
 Note:
     When instiantating a TermFunction you just write:  
@@ -88,7 +82,7 @@ end
 """
 #  function compute_value(tf :: TermFunction{F}, position :: Vector{Float64})
 
-This function compute value of function at a given position summing over all terms
+This function computes value of function at a given position summing over all terms
     
 """
 function compute_value(tf :: TermFunction{F}, position :: Array{Float64,N}) where {F,N}
@@ -103,7 +97,7 @@ end
 """
 #  function compute_value(tf :: TermFunction{F}, position :: Array{Float64,N}, terms::Vector{Int64})
 
-This function compute value of function at a given position summing over all terms passed as arg
+This function computes value of function at a given position summing over all terms passed as arg
     
 """
 function compute_value(tf :: TermFunction{F}, position :: Array{Float64,N}, terms::Vector{Int64}) where {F,N}
@@ -134,13 +128,14 @@ This structure is the building block for all gradient computations
 
 ## Fields
 
-- eval is a function of signature Fn(Observations, Array{Float64,N}, Int64, Array{Float64,N}) 
+- eval is a function of signature **Fn(Observations, Array{Float64,N}, Int64, Array{Float64,N})**   
     taking as arguments (in this order):   
-        - observations  
-        - position  
-        - a term rank  
-        - a vector for gradient to be returned in (it avoid reallocations as we loop on this function summing
-            the resulting Array on required terms). Array for gradient has the same dimension as array for position (...)
+    - observations  
+    - position  
+    - a term rank  
+    - a vector for gradient to be returned in. This avoid reallocations as we loop on this function summing
+            the resulting Array on required terms.  
+            Array for gradient has the same dimension as array for position (...)
     
 - observations : the observations of the problem
 - dims : characterize the dimensions on variable for which we do a minimization
@@ -236,8 +231,8 @@ end
     
 ## Fields
 
-- compute_term_value : a TermFunction{F}
-- compute_term_gradient: a TermGradient{G}
+- compute\\_term\\_value : a TermFunction{F}
+- compute\\_term\\_gradient: a TermGradient{G}
 
 It is associated to various functions dispatching computations to it.
 

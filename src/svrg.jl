@@ -22,6 +22,11 @@ We have the following sequence:
     
    The step size used in the algorithm is constant and according to the ref paper it should be of the order of
    L/4 where L is the lipschitz constant of the function to minimize
+
+## FIELDS
+
+- nb\\_minibatch : The number of minibatch to run after one full batch run
+- stepsize: the step to use in 
 """
 mutable struct SVRG 
     # number of minibatch of one term.
@@ -52,7 +57,7 @@ The function has 3 type parameters F, G and N:
 - svrgpb : the structure describing main parameters of the batch strategy
 - Evaluator{F,G}
 - max_iter : maximum number of iterations
-- initialposition : initial position of the iterations
+- initialposition : initial position at iteration beginning
 
 """
 function minimize(svrgpb::SVRG, evaluation::Evaluator{F,G}, max_iterations, initial_position::Array{Float64,N}) where {F,G,N}

@@ -14,7 +14,7 @@ using LinearAlgebra
 # We have to implement 
 # (observations: Observations, position: Array{Float64}, term : Int64) -> Float64
 """
-# function linear\\_reg_term\\_value(observations:: Observations, position:: Array{Float64}, term :: Int64)
+# function linear\\_reg\\_term\\_value(observations:: Observations, position:: Array{Float64}, term :: Int64)
 
 ```math
 term value = 1/2 * (y -  observation[term] \\cdot position)^2
@@ -30,7 +30,7 @@ end
 
 
 """
-# function linear_reg_term_gradient(observations::Observations, position::Array{Float64,1}, term::Int64, gradient::Array{Float64,1})
+# function linear\\_reg\\_term\\_gradient(observations::Observations, position::Array{Float64,1}, term::Int64, gradient::Array{Float64,1})
 
 just take the gradient of the expression for linear\\_reg\\_term\\_value
 """
