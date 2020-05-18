@@ -65,7 +65,7 @@ function test_linear_regression_svrg()
     term_function =  TermFunction{typeof(linear_reg_term_value)}(linear_reg_term_value, observations, Dims{1}(3))
     term_gradient = TermGradient{typeof(linear_reg_term_gradient)}(linear_reg_term_gradient ,observations, Dims{1}(3))
     evaluator = Evaluator{typeof(linear_reg_term_value),typeof(linear_reg_term_gradient)}(term_function,term_gradient) 
-    svrg_pb = SVRG(50, 0.1)
+    svrg_pb = SVRG(100, 0.1)
     # solve.
     nb_iter = 50
     position = fill(1., 3)
