@@ -37,10 +37,12 @@ function test_linear_regression_scsg()
     # solve.
     nb_iter = 50
     position = fill(1., 3)
+    initial_error = compute_value(evaluator, position)
+    @info "\n initial error \n\n" initial_error
     position, value = minimize(scsg_pb, evaluator, nb_iter, position)
     @printf(stdout, "value = %f, position = %f %f %f ", value , position[1], position[2], position[3])
     @printf(stdout, "\n\n test_linear_regression_scsg done \n \n")
-    value < 0.6 ? true : false
+    value < 0.65 ? true : false
 end
 
 
@@ -65,12 +67,14 @@ function test_linear_regression_svrg()
     term_function =  TermFunction{typeof(linear_reg_term_value)}(linear_reg_term_value, observations, Dims{1}(3))
     term_gradient = TermGradient{typeof(linear_reg_term_gradient)}(linear_reg_term_gradient ,observations, Dims{1}(3))
     evaluator = Evaluator{typeof(linear_reg_term_value),typeof(linear_reg_term_gradient)}(term_function,term_gradient) 
-    svrg_pb = SVRG(100, 0.1)
+    svrg_pb = SVRG(100, 0.2)
     # solve.
     nb_iter = 50
     position = fill(1., 3)
+    initial_error = compute_value(evaluator, position)
+    @info "\n initial error \n\n" initial_error
     position, value = minimize(svrg_pb, evaluator, nb_iter, position)
     @printf(stdout, "value = %f, position = %f %f %f ", value ,  position[1], position[2], position[3])
     @printf(stdout, "\n\n test_linear_regression_svrg done \n \n")
-    value < 0.6 ? true : false
+    value < 0.65 ? true : false
 end

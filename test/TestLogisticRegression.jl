@@ -22,7 +22,7 @@ function initMnitObservations()
     # check path and load
     if !isfile(IMAGE_FNAME_STR) || !isfile(LABEL_FNAME_STR)
         @warn("\n\n mnist_logistic_regression : bad path to mnist data file, cannot do tests, download and install files")
-        exit(1)
+        return nothing
     end
     mnistdata = mnist.MnistData(IMAGE_FNAME_STR, LABEL_FNAME_STR)
     # transform data into logistic regression problem
@@ -43,12 +43,18 @@ function initMnitObservations()
         push!(values, Float64(mnistdata.labels[i]))
     end
     observations = Observations(datas,values)
+    Some(observations)
 end
 
 
 function mnist_logistic_regression_scsg()
     @printf(stdout, "\n\n\n begining mnist_logistic_regression_scsg ...")
-    observations= initMnitObservations()
+    mnist = initMnitObservations()
+    if isnothing(mnist)
+        return false
+    end
+    #
+    observations = something(mnist)
     nbclass = 10
     # struct LogisticRegression takes care of interceptions terms and constraint on first class
     # define TermFunction , TermGradient and Evaluator, dims is one less than number of classes for identifiability constraints
@@ -74,7 +80,12 @@ end
 
 function mnist_logistic_regression_svrg()
     @printf(stdout, "\n\n\n begining mnist_logistic_regression_svrg ...")
-    observations= initMnitObservations()
+    mnist = initMnitObservations()
+    if isnothing(mnist)
+        return false
+    end
+    #
+    observations = something(mnist)
     nbclass = 10
     # struct LogisticRegression takes care of interceptions terms and constraint on first class
     # define TermFunction , TermGradient and Evaluator, dims is one less than number of classes for identifiability constraints
