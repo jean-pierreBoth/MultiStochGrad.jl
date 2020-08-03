@@ -88,9 +88,11 @@ function minimize(svrgpb::SVRG, evaluation::Evaluator{F,G}, max_iterations, init
             position = position - svrgpb.stepsize * direction;
         end
         value = compute_value(evaluation, position)
-        @info "iteration  value " iteration value
+        if iteration == 1
+            @info "iteration initial value " iteration value
+        end
         if iteration >= max_iterations 
-            @info("Reached maximal number of iterations required , stopping optimization");
+            @info "Reached maximal number of iterations required , stopping optimization, value :" value
             return position, value
         end
     end

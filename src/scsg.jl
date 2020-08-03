@@ -175,7 +175,6 @@ The function has 3 types parameters F, G and N.
 
 """
 function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, initial_position::Array{Float64,N}) where {F,G,N}
-    @debug "scsg_pb" scsg_pb
     #
     direction = zeros(Float64, size(initial_position))
     large_batch_gradient = zeros(Float64, size(initial_position))
@@ -197,10 +196,8 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
         batch_indexes = samplewithoutreplacement(batch_info.large_batchsize, all_index)
         # compute gradient on large batch index set and store initial position
         compute_gradient!(evaluation, position , batch_indexes, large_batch_gradient)
-
         # get mean number  binomial law for number Nj of small batch iterations
         nb_mini_batch = get_nbminibatch(batch_info)
-        @info "batch info " batch_info.large_batchsize batch_info.mini_batchsize nb_mini_batch batch_info.stepsize
         position_before_mini_batch = Array{Float64}(position)
         # loop on small batch iterations
         for i in 1:nb_mini_batch
@@ -213,9 +210,11 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
         end
         @debug "norm L2 direction" norm(direction)
         value = compute_value(evaluation, position)
-        @info "iteration  value " iteration value
+        if i == 1
+            @debug "iteration initial value " iteration value
+        end
         if iteration >= max_iterations 
-            @info("Reached maximal number of iterations required , stopping optimization");
+            @info("Reached maximal number of iterations required , stopping optimization", value);
             return position, value
         end
     end

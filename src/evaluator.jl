@@ -166,7 +166,7 @@ end
 
 This function computes a gradient Array at a given position summing over all terms passed as arg.
 
-NOTA: It must be noted that this function computes the mean of gradients returned by gradient returned on each term.
+NOTA: It must be noted that this function computes the mean of gradients returned by the termg function returned on each term.
 So that the gradient computed on a batch is an estimator of the gradient computed on the whole objective function.
 
 It is multithreaded and computes gradient by blocks of 1500 terms.
