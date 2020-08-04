@@ -69,6 +69,7 @@ function minimize(svrgpb::SVRG, evaluation::Evaluator{F,G}, max_iterations, init
     #
     position = Array{Float64,N}(initial_position)
     iteration = 0
+    initial_value = 0.
     more = true
     while more 
         iteration += 1
@@ -89,10 +90,10 @@ function minimize(svrgpb::SVRG, evaluation::Evaluator{F,G}, max_iterations, init
         end
         value = compute_value(evaluation, position)
         if iteration == 1
-            @info "iteration initial value " iteration value
+            initial_value = value
         end
         if iteration >= max_iterations 
-            @info "Reached maximal number of iterations required , stopping optimization, value :" value
+            @info "Reached maximal number of iterations required, initial_value final value:" initial_value value
             return position, value
         end
     end

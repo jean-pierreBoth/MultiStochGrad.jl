@@ -186,6 +186,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
     #
     position = Array{Float64}(initial_position)
     iteration = 0
+    initial_value = 0
     more = true
     while more 
         iteration += 1
@@ -211,12 +212,12 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
         @debug "norm L2 direction" norm(direction)
         value = compute_value(evaluation, position)
         if i == 1
-            @debug "iteration initial value " iteration value
+            initial_value = value
+            @debug "initial value " initial_value
         end
         if iteration >= max_iterations 
-            @info("Reached maximal number of iterations required , stopping optimization", value);
+            @info "Reached maximal number of iterations required , initial_value value " initial_value value
             return position, value
         end
     end
-
 end
