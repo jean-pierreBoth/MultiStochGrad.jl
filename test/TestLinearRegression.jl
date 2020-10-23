@@ -69,7 +69,7 @@ function test_linear_regression_svrg()
     evaluator = Evaluator{typeof(linear_reg_term_value),typeof(linear_reg_term_gradient)}(term_function,term_gradient) 
     svrg_pb = SVRG(100, 0.2)
     # solve.
-    nb_iter = 50
+    nb_iter = 60
     position = fill(1., 3)
     initial_error = compute_value(evaluator, position)
     @info "\n initial error \n\n" initial_error

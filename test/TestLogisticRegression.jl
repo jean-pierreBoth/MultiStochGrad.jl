@@ -96,7 +96,7 @@ function mnist_logistic_regression_svrg()
     # define parameters for svrg  1000 minibatch , step 0.02
     svrg_pb = SVRG(2000, 0.05)
     # solve.
-    nb_iter = 50
+    nb_iter = 60
     initial_position= fill(0.5, dims)
     initial_error = compute_value(evaluator, initial_position)
     @info "initial error " initial_error
