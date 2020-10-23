@@ -211,7 +211,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
         end
         @debug "norm L2 direction" norm(direction)
         value = compute_value(evaluation, position)
-        if i == 1
+        if iteration == 1
             initial_value = value
             @debug "initial value " initial_value
         end
