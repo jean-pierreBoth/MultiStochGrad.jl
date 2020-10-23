@@ -8,11 +8,11 @@ using  LinearAlgebra, Test
 using  LinearAlgebra, Test
 using Random, Distributions
 using Printf
-
+using Statistics
 
 include("../src/applis/LogisticRegression.jl")
-
 include("../src/mnist.jl")
+
 
 const IMAGE_FNAME_STR  = "/home.1/jpboth/Data/MNIST/train-images-idx3-ubyte"
 const LABEL_FNAME_STR  = "/home.1/jpboth/Data/MNIST/train-labels-idx1-ubyte"
