@@ -20,5 +20,5 @@ include("TestLogisticRegression.jl")
 
 @testset "logistic_reg" begin
 @test mnist_logistic_regression_svrg()
-@test mnist_logistic_regression_svrg()
+@test mnist_logistic_regression_scsg()
 end
