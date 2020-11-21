@@ -60,20 +60,21 @@ error at initial position: 8.88
 
 | nb iter | B_0    |   m_0    | step_0  | y value | time(s) |
 |  :---:  | :---:  |  :-----: | :----:  |   ----  |  ----   |
-|  50     | 0.015  |  0.003   |  0.1    |  0.296  |  11.8   |
-|  50     | 0.02   |  0.004   |  0.1    |  0.29   |  13.3   |
-|  50     | 0.02   |  0.006   |  0.1    |  0.28   |  16.5   |
-|  70     | 0.02   |  0.006   |  0.1    |  0.27   |  23.8   |
+|  50     | 0.02   |  0.004   |  0.1    |  0.29   |  11.3   |
+|  50     | 0.02   |  0.006   |  0.1    |  0.281  |  14.    |
+|  70     | 0.02   |  0.006   |  0.1    |  0.272  |  19.5   |
+|  100    | 0.02   |  0.006   |  0.1    |  0.265  |  27.    |
 
 - initialization position : 9 images with *constant pixel = 0.0*,
 error at initial position: 2.3
 
 | nb iter | B_0    |   m_0    | step_0  | y value  | time(s) |
 |  ---    | :----: |  ----    | ------  |   ----   |  ----  |
-|  50     | 0.015  |  0.003   |  0.1    |  0.286   |  12    |
-|  50     | 0.02   |  0.004   |  0.1    |  0.28    |  13.5  |
-|  50     | 0.02   |  0.006   |  0.1    |  0.276   |  16.5  |
-|  100    | 0.02   |  0.004   |  0.1    |  0.266   |  26    |
+|  50     | 0.015  |  0.003   |  0.1    |  0.285   |  10.2  |
+|  50     | 0.02   |  0.004   |  0.1    |  0.28    |  11    |
+|  50     | 0.02   |  0.006   |  0.1    |  0.274   |  14    |
+|  100    | 0.02   |  0.004   |  0.1    |  0.266   |  22.   |
+|  100    | 0.02   |  0.006   |  0.1    |  0.262   |  27.5  |
 
 ### SVRG logistic regression
 
@@ -102,7 +103,7 @@ All times were obtained withe @time macro and julia running with JULIA_NUM_THREA
 We see that SCSG is fast to reach a minimum of 0.28, it is more difficult to reach 0.26-0.27
 it nevertheless quite competitive compared to SVRG.  
 The efficiency gain with respect to SVRG is not as important
-as with the *Rust* version (see below) where we have a factor 2 in cpu-time **due to a multithreading effect**.
+as with the *Rust* version (see below) where we have a factor 1.8 in cpu-time **due to a multithreading effect**.
 Our test uses 60000 observations and SCSG runs at most on 1/10 of the terms in a batch (i.e 6000 terms), on the constrary SVRG batches run on the full 60000 terms.  
 **Batch sizes on SCSG are not large enough to fully benefit of the multithreading.**
 This can be verified by setting JULIA_NUM_THREADS = 1 and compare how SCSG and SVRG timing benefit from
@@ -110,7 +111,7 @@ the threading:
 
 We did 2  checks with initial conditions set to pixel = 0.5 and compared with previous results:
 
-- For SCSG we ran the case with parameters (70, 0.02, 0.006, 0.1 )  corresponding to last line of first array of results. We had with 8 threads y=0.27 in 23.8 s , and with one thread we obtain y=0.27 in 40s, so the threading gives us less than a factor 2.
+- For SCSG we ran the case with parameters (70, 0.02, 0.006, 0.1 )  corresponding to last line of first array of results. We had with 8 threads y=0.27 in 20s , and with one thread we obtain y=0.27 in 36.5s, so the threading gives us less than a factor 2.
 
 - For SVRG we ran the case with parameters (50,1000, 0.05) corresponding to the first line of first array of result for SVRG.
 We had y=0.269 with 25s, and with one thread we need 72s. Here the threading
@@ -120,7 +121,7 @@ So SCSG  efficiency should be more evident on larger problems, note that the thr
 
 The logistic regression needed the explicit use of BLAS interface to speed up vectorization.
 
-*Nevertheless the Julia version runs within a factor 1.5 or 2 of the Rust version which seems a good compromise.*
+*Nevertheless the Julia version runs within a factor 1.5 or 1.8 of the Rust version which seems a good compromise.*
 
 ## Rust version of this package
 
@@ -131,6 +132,11 @@ The Rust version has also an implementation of the SAG algorithm:
 The Stochastic Averaged Gradient Descent as described in the paper:
 **"Minimizing Finite Sums with the Stochastic Average Gradient" (2013, 2016)**
 M.Schmidt, N.LeRoux, F.Bach.
+
+## Note
+
+- version 0.1.2 runs 10-15 % faster on SCSG due to optiisation
+see  [The need for rand speed](https://bkamins.github.io/julialang/2020/11/20/rand.html) or julia bloggers.
 
 ## License
 

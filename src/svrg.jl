@@ -67,6 +67,7 @@ function minimize(svrgpb::SVRG, evaluation::Evaluator{F,G}, max_iterations, init
     mini_batch_gradient_origin = zeros(Float64, size(initial_position))
     nbterms = get_nbterms(evaluation)
     #
+    mt = MersenneTwister(117);
     position = Array{Float64,N}(initial_position)
     iteration = 0
     initial_value = 0.
@@ -82,7 +83,7 @@ function minimize(svrgpb::SVRG, evaluation::Evaluator{F,G}, max_iterations, init
         # loop on small batch iterations
         for i in 1:nb_mini_batch
             # sample mini batch terms
-            term = 1 + floor(Int64, nbterms * rand())
+            term = 1 + floor(Int64, nbterms * rand(mt))
             compute_gradient!(evaluation, position , term, mini_batch_gradient_current)
             compute_gradient!(evaluation, position_before_mini_batch , term, mini_batch_gradient_origin)
             direction = mini_batch_gradient_current - mini_batch_gradient_origin + full_batch_gradient;

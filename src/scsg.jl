@@ -76,11 +76,11 @@ end
 
 # select sizeasked terms selected without replacement
 # returns the selected terms in a Vector{Int64}
-function samplewithoutreplacement(size_asked::Int64, terms:: Vector{Int64})
+function samplewithoutreplacement(size_asked::Int64, terms:: Vector{Int64}, rng::MersenneTwister)
     size_in = length(terms)
     out_terms = Vector{Int64}()
     for i in 1:length(terms) 
-        if rand() * (size_in - i) < size_asked - length(out_terms)
+        if rand(rng) * (size_in - i) < size_asked - length(out_terms)
             push!(out_terms, terms[i])
         end
     end
@@ -94,17 +94,20 @@ end
 #  1. Faster methods for Random Sampling J.S Vitter Comm ACM 1984
 #  2. Kim-Hung Li Reservoir Sampling Algorithms : Comm ACM Vol 20, 4 December 1994
 #  3. https://en.wikipedia.org/wiki/Reservoir_sampling
+# 
+# For passing the rng as arg see also:
+# https://bkamins.github.io/julialang/2020/11/20/rand.html or julia bloggers : "The need for rand speed"
 
-function samplewithoutreplacement_reservoir(size_asked::Int64, in_terms::Vector{Int64})
+function samplewithoutreplacement_reservoir(size_asked::Int64, in_terms::Vector{Int64}, rng::MersenneTwister)
     out_terms = in_terms[1:size_asked]
-    w  = exp(log(rand()/(size_asked)))
+    w  = exp(log(rand(rng)/(size_asked)))
     s = size_asked
     while s <= length(in_terms)
-        s = s + floor(Int64, log(rand())/log(1-w)) + 1
+        s = s + floor(Int64, log(rand(rng))/log1p(-w)) + 1
         if s <= length(in_terms)
-            k = 1 + floor(Int64, size_asked * rand())
+            k = 1 + floor(Int64, size_asked * rand(rng))
             out_terms[k] = in_terms[s]
-            w = w * exp(log(rand())/size_asked)
+            w = w * exp(log(rand(rng))/size_asked)
         end
     end
     out_terms
@@ -184,6 +187,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
     all_index = collect(1:nbterms)
     batch_growing_factor = get_batchgrowingfactor(scsg_pb, max_iterations, nbterms)
     #
+    mt = MersenneTwister(117);
     position = Array{Float64}(initial_position)
     iteration = 0
     initial_value = 0
@@ -194,7 +198,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
         batch_info = get_batchsizeinfo(scsg_pb, batch_growing_factor, nbterms, iteration)
         @debug "batch_info" batch_info
         # batch sampling
-        batch_indexes = samplewithoutreplacement(batch_info.large_batchsize, all_index)
+        batch_indexes = samplewithoutreplacement(batch_info.large_batchsize, all_index, mt)
         # compute gradient on large batch index set and store initial position
         compute_gradient!(evaluation, position , batch_indexes, large_batch_gradient)
         # get mean number  binomial law for number Nj of small batch iterations
@@ -203,7 +207,7 @@ function minimize(scsg_pb::SCSG, evaluation::Evaluator{F,G}, max_iterations, ini
         # loop on small batch iterations
         for i in 1:nb_mini_batch
             # sample mini batch terms
-            batch_indexes = samplewithoutreplacement_reservoir(batch_info.mini_batchsize, all_index)
+            batch_indexes = samplewithoutreplacement_reservoir(batch_info.mini_batchsize, all_index, mt)
             compute_gradient!(evaluation, position , batch_indexes, mini_batch_gradient_current)
             compute_gradient!(evaluation, position_before_mini_batch , batch_indexes, mini_batch_gradient_origin)
             direction = mini_batch_gradient_current - mini_batch_gradient_origin + large_batch_gradient;
