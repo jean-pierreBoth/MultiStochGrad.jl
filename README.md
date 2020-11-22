@@ -135,7 +135,7 @@ M.Schmidt, N.LeRoux, F.Bach.
 
 ## Note
 
-- version 0.1.2 runs 10-15 % faster on SCSG due to optiisation
+- version 0.1.2 runs 10-15 % faster on SCSG due to some optimization
 see  [The need for rand speed](https://bkamins.github.io/julialang/2020/11/20/rand.html) or julia bloggers.
 
 ## License
