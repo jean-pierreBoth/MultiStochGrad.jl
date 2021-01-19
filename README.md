@@ -27,6 +27,12 @@ and updating position by combining these global and local gradients.
 
 ## Structure of the package and documentation
 
+The user interacts mainly with two structures defining the optimization problem (detailed in file **evaluator.jl**) specifying how to compute each term value and gradient:
+
+    - struct TermFunction{F <: Function}
+
+    - struct TermGradient{G <: Function>}
+  
 The structure of the package is explicited in the documentation along with a html page for each implemented SGD.  
 
 Doc is generated as usual by running julia make.jl in the docs/src directory.  
@@ -35,7 +41,7 @@ Further documentation can be found in docs of the Julia package, more in the doc
 
 ## Examples and tests
 
-Small tests consist in a line fitting problem that is taken  from the crate optimisation.
+Small tests consist in a line fitting problem and logisitc regression.
 
 Examples are based on logisitc regression applied to digits MNIST database
 (as in the second paper on SCSG).  

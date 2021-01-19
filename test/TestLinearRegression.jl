@@ -4,7 +4,6 @@ using MultiStochGrad
 
 using  LinearAlgebra, Test
 using Random, Distributions
-using Printf
 
 
 include("../src/applis/LinearRegression.jl")
@@ -40,8 +39,8 @@ function test_linear_regression_scsg()
     initial_error = compute_value(evaluator, position)
     @info "\n initial error \n\n" initial_error
     position, value = minimize(scsg_pb, evaluator, nb_iter, position)
-    @printf(stdout, "value = %f, position = %f %f %f ", value , position[1], position[2], position[3])
-    @printf(stdout, "\n\n test_linear_regression_scsg done \n \n")
+    @info "value , position " value  position
+    @info "\n\n test_linear_regression_scsg done \n \n"
     value < 0.65 ? true : false
 end
 
@@ -74,7 +73,7 @@ function test_linear_regression_svrg()
     initial_error = compute_value(evaluator, position)
     @info "\n initial error \n\n" initial_error
     position, value = minimize(svrg_pb, evaluator, nb_iter, position)
-    @printf(stdout, "value = %f, position = %f %f %f ", value ,  position[1], position[2], position[3])
-    @printf(stdout, "\n\n test_linear_regression_svrg done \n \n")
+    @info "value , position ", value ,  position
+    @info "\n\n test_linear_regression_svrg done \n \n"
     value < 0.65 ? true : false
 end

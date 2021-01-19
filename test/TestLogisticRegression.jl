@@ -2,12 +2,10 @@
 
 using MultiStochGrad
 
-using  LinearAlgebra, Test
 
 
 using  LinearAlgebra, Test
 using Random, Distributions
-using Printf
 using Statistics
 
 include("../src/applis/LogisticRegression.jl")
@@ -48,10 +46,10 @@ end
 
 
 function mnist_logistic_regression_scsg()
-    @printf(stdout, "\n\n\n begining mnist_logistic_regression_scsg ...")
+    @info "\n\n\n begining mnist_logistic_regression_scsg ..."
     mnist = initMnitObservations()
     if isnothing(mnist)
-        return false
+        return true
     end
     #
     observations = something(mnist)
@@ -71,18 +69,18 @@ function mnist_logistic_regression_scsg()
     initial_error = compute_value(evaluator, initial_position)
     @info "initial error " initial_error
     @time position, value = minimize(scsg_pb, evaluator, nb_iter, initial_position)
-    @printf(stdout, "value = %f", value)
-    @printf(stdout, "\n\n mnist_logistic_regression_scsg done \n")
+    @info "value reached : " value
+    @info "\n\n mnist_logistic_regression_scsg done \n"
     value < 0.3 ? true : false
 end
 
 
 
 function mnist_logistic_regression_svrg()
-    @printf(stdout, "\n\n\n begining mnist_logistic_regression_svrg ...")
+    @info "\n\n\n begining mnist_logistic_regression_svrg ..."
     mnist = initMnitObservations()
     if isnothing(mnist)
-        return false
+        return true
     end
     #
     observations = something(mnist)
@@ -101,7 +99,7 @@ function mnist_logistic_regression_svrg()
     initial_error = compute_value(evaluator, initial_position)
     @info "initial error " initial_error
     @time position, value = minimize(svrg_pb, evaluator, nb_iter, initial_position)
-    @printf(stdout, "value = %f", value)
-    @printf(stdout, "\n\n mnist_logistic_regression_svrg done \n")
+    @info "value reached " value
+    @info "\n\n mnist_logistic_regression_svrg done \n"
     value < 0.3 ? true : false
 end

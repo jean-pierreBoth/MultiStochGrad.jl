@@ -4,7 +4,7 @@ using MultiStochGrad, Test
 using Logging
 using Base.CoreLogging
 
-logger = ConsoleLogger(stdout, CoreLogging.Debug)
+logger = ConsoleLogger(stdout, CoreLogging.Info)
 global_logger(logger)
 
 
