@@ -3,27 +3,6 @@
 
 
 
-"""
-
-# struct Observations
-
-
-## Fields
-
-- datas : list of data vector one for each observations
-- value\\_at\\_datas
-For regressions problems for example length(datas) is number of observations.
-    and length(datas[1]) is 1+dimension of observations data beccause of interception terms.
-"""
-mutable struct Observations 
-    datas :: Vector{Vector{Float64}}
-    value_at_data :: Vector{Float64}
-    #
-    function Observations(datas::Vector{Vector{Float64}}, values::Vector{Float64})
-        new(datas, values)
-    end
-end
-
 
 
 """
@@ -33,16 +12,15 @@ A structure grouping observations and an evaluation function
 
 ## Fields
 
-- eval is a function of signature   **Fn(Observations, Array{Float64, N}, Int64)::Float64** 
+- eval is a function of signature   **Fn(Array{Float64, N}, Int64)::Float64** 
     taking as arguments (in this order):
-    - observations     
     - position    
     - a term rank    
 
     This function returns the value of the component of rank term in the sum of objective function
         at position position given in args  
 
-- observations
+- nbterms in the sum
 
 - dims : characterize the dimensions on variable for which we do a minimization
     It is not the same as observations which is always a one dimensional array.  
@@ -53,19 +31,20 @@ A structure grouping observations and an evaluation function
     It is also the dimension of gradients we compute.  
 
 Note:
-    When instiantating a TermFunction you just write:  
-    *tf = TermFunction{typeof(yourfunction)}(yourfunction, obsrevations, dims)*
+    When instantiating a TermFunction you just write:  
+    *tf = TermFunction{typeof(yourfunction)}(yourfunction, nbterms, dims)*
 
 """
 mutable struct TermFunction{F <: Function}
     eval :: F
-    observations :: Observations
+    nbterms :: Int64
     dim :: Dims
-    function TermFunction{F}(evalf :: F, observations :: Observations, d::Dims) where{F}
+    function TermFunction{F}(evalf :: F, nbterms:: Int64, d::Dims) where{F}
         # check signature
         z = zeros(d)
-        dist = evalf(observations, z, 1)
-        new(evalf, observations, d)
+        evalf(z, 1)
+        # we can initialize object
+        new(evalf, nbterms, d)
     end
 end
 
@@ -78,7 +57,7 @@ This function computes value of function at a given position summing over all te
     
 """
 function compute_value(tf :: TermFunction{F}, position :: Array{Float64,N}) where {F,N}
-    nbterm = length(tf.observations.datas)
+    nbterm = tf.nbterms
     value = compute_value(tf, position, Vector{Int64}((1:nbterm)))
     value
 end
@@ -103,7 +82,7 @@ function compute_value(tf :: TermFunction{F}, position :: Array{Float64,N}, term
     Threads.@threads for i in 1:nbblocks 
         first = (i-1) * batchsize +1
         last = min(i*batchsize, nbterms)
-        blockvalue[i] = mapreduce(i->tf.eval(tf.observations, position, i), + , terms[first:last])
+        blockvalue[i] = mapreduce(i->tf.eval(position, i), + , terms[first:last])
     end
     # pamp with batch size = 1000. check speed versus a mapreduce
     value = sum(blockvalue)/nbterms
@@ -120,30 +99,29 @@ This structure is the building block for all gradient computations
 
 ## Fields
 
-- eval is a function of signature **Fn(Observations, Array{Float64,N}, Int64, Array{Float64,N})**   
+- eval is a function of signature **Fn(Array{Float64,N}, Int64, Array{Float64,N})**   
     taking as arguments (in this order):   
-    - observations  
     - position  
     - a term rank  
     - a vector for gradient to be returned in. This avoid reallocations as we loop on this function summing
             the resulting Array on required terms.  
             Array for gradient has the same dimension as array for position (...)
     
-- observations : the observations of the problem
+- nbterms : the number of terms in the sum defining the objective function
 - dims : characterize the dimensions on variable for which we do a minimization
 
 """
 mutable struct TermGradient{G<:Function}
     eval :: G
-    observations :: Observations
+    nbterms :: Int64
     dim :: Dims
-    function TermGradient{G}(evalg :: G, observations :: Observations, d::Dims) where {G}
-        # check signature
+    function TermGradient{G}(evalg :: G, nbterms :: Int64, d::Dims) where {G}
+        # we check that signature of function defined by the user is correct
         z = zeros(d)
         grad = zeros(d)
-        evalg(observations, z, 1, grad)
-        # find an assertion
-        new(evalg, observations, d)
+        evalg(z, 1, grad)
+        # we can allocate our object
+        new(evalg, nbterms, d)
     end
 end
 
@@ -156,7 +134,7 @@ the function  dispatches to TermGradient  the actual gradient computation for a 
 
 """
 function compute_gradient!(termg::TermGradient{G}, position::Array{Float64,N} , term:: Int64, gradient:: Array{Float64,N}) where {G,N}
-    termg.eval(termg.observations, position, term, gradient)
+    termg.eval(position, term, gradient)
 end
 
 
@@ -190,7 +168,7 @@ function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N},
             gradtmp = zeros(Float64, size(gradient))
             gradblocks[i] = zeros(Float64, size(gradient))
             for j in first:last
-                termg.eval(termg.observations, position, terms[j], gradtmp)
+                termg.eval(position, terms[j], gradtmp)
                 gradblocks[i] = gradblocks[i] + gradtmp
             end
         end
@@ -208,7 +186,7 @@ end
 This function computes a gradient Array at a given position summing over all terms
 """
 function compute_gradient!(termg::TermGradient{G}, position :: Array{Float64,N}, gradient::Array{Float64,N}) where {G,N}
-    nbterms = length(termg.observations.datas)
+    nbterms = termg.nbterms
     compute_gradient!(termg, position, collect(1:nbterms), gradient)
 end
 
@@ -307,5 +285,5 @@ end
 retrieves number of terms in the sum defining objective function
 """
 function get_nbterms(evaluator::Evaluator{F,G}) where {F,G}
-    length(evaluator.compute_term_gradient.observations.datas)
+    evaluator.compute_term_gradient.nbterms
 end

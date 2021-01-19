@@ -27,17 +27,21 @@ and updating position by combining these global and local gradients.
 
 ## Structure of the package and documentation
 
-The user interacts mainly with two structures defining the optimization problem (detailed in file **evaluator.jl**) specifying how to compute each term value and gradient:
+The user API relies mainly upon two structures defining the optimization problem (detailed in file **evaluator.jl**) specifying how to compute each value and gradient of each term of the sum at a given position:
 
     - struct TermFunction{F <: Function}
 
     - struct TermGradient{G <: Function>}
-  
-The structure of the package is explicited in the documentation along with a html page for each implemented SGD.  
+
+The directory src/applis show examples of definitions of these 2 structures.  
+
+These two structures are grouped into a **struct Evaluator{F,G}** which can do value and gradient computations needed during the iterations.  
+Each algorithm SVRG or SCSG is described by its own structure and has its specific parameters and iteration strategy.
+A minimize function taking as arguments a structure SCSG or SVRG, an evaluator structure, the maximum number of iterations and an initial position then returns the minimum value obtained and its correspond position.
 
 Doc is generated as usual by running julia make.jl in the docs/src directory.  
 
-Further documentation can be found in docs of the Julia package, more in the doc of the Rust crate and at last the reference papers.
+Further documentation can be found in docs of the Julia package, more in the doc of the Rust crate and at last in the reference papers.
 
 ## Examples and tests
 

@@ -57,8 +57,14 @@ function mnist_logistic_regression_scsg()
     # struct LogisticRegression takes care of interceptions terms and constraint on first class
     # define TermFunction , TermGradient and Evaluator, dims is one less than number of classes for identifiability constraints
     dims = Dims{2}((length(observations.datas[1]) , nbclass-1))
-    term_function =  TermFunction{typeof(logistic_term_value)}(logistic_term_value, observations, dims)
-    term_gradient = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,observations, dims)
+    nbterms = length(observations.datas)
+    #
+    logistic_term_value = make_logistic_term_value(observations)
+    term_function =  TermFunction{typeof(logistic_term_value)}(logistic_term_value, nbterms, dims)
+    #
+    logistic_term_gradient = make_logistic_term_gradient(observations)
+    term_gradient = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,nbterms, dims)
+    #
     evaluator = Evaluator{typeof(logistic_term_value),typeof(logistic_term_gradient)}(term_function, term_gradient)
     # define parameters for scsg
     scsg_pb = SCSG(0.1, 0.006, 1 , 0.02)
@@ -88,8 +94,14 @@ function mnist_logistic_regression_svrg()
     # struct LogisticRegression takes care of interceptions terms and constraint on first class
     # define TermFunction , TermGradient and Evaluator, dims is one less than number of classes for identifiability constraints
     dims = Dims{2}((length(observations.datas[1]) , nbclass-1))
-    term_function =  TermFunction{typeof(logistic_term_value)}(logistic_term_value, observations, dims)
-    term_gradient = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,observations, dims)
+    nbterms = length(observations.datas)
+    #
+    logistic_term_value = make_logistic_term_value(observations)
+    term_function =  TermFunction{typeof(logistic_term_value)}(logistic_term_value, nbterms, dims)
+    #
+    logistic_term_gradient = make_logistic_term_gradient(observations)
+    term_gradient = TermGradient{typeof(logistic_term_gradient)}(logistic_term_gradient ,nbterms, dims)
+    #
     evaluator = Evaluator{typeof(logistic_term_value),typeof(logistic_term_gradient)}(term_function, term_gradient)
     # define parameters for svrg  1000 minibatch , step 0.02
     svrg_pb = SVRG(2000, 0.05)

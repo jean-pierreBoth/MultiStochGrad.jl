@@ -28,10 +28,15 @@ function test_linear_regression_scsg()
         push!(values, y)
     end
     observations= Observations(datas,values)
-    # define our evaluations 
-    term_function =  TermFunction{typeof(linear_reg_term_value)}(linear_reg_term_value, observations, Dims{1}(3))
-    term_gradient = TermGradient{typeof(linear_reg_term_gradient)}(linear_reg_term_gradient ,observations, Dims{1}(3))
+    nbterms = length(observations.datas)
+    # define our evaluations
+    linear_reg_term_value = make_linear_reg_term_value(observations)
+    term_function =  TermFunction{typeof(linear_reg_term_value)}(linear_reg_term_value, nbterms, Dims{1}(3))
+    #
+    linear_reg_term_gradient = make_linear_reg_term_gradient(observations)
+    term_gradient = TermGradient{typeof(linear_reg_term_gradient)}(linear_reg_term_gradient ,nbterms, Dims{1}(3))
     evaluator = Evaluator{typeof(linear_reg_term_value),typeof(linear_reg_term_gradient)}(term_function,term_gradient) 
+    #
     scsg_pb = SCSG(0.1, 0.3, 1 , 0.7)
     # solve.
     nb_iter = 50
@@ -62,10 +67,15 @@ function test_linear_regression_svrg()
         push!(values, y)
     end
     observations= Observations(datas,values)
+    nbterms = length(observations.datas)
     # define our evaluations 
-    term_function =  TermFunction{typeof(linear_reg_term_value)}(linear_reg_term_value, observations, Dims{1}(3))
-    term_gradient = TermGradient{typeof(linear_reg_term_gradient)}(linear_reg_term_gradient ,observations, Dims{1}(3))
-    evaluator = Evaluator{typeof(linear_reg_term_value),typeof(linear_reg_term_gradient)}(term_function,term_gradient) 
+    linear_reg_term_value = make_linear_reg_term_value(observations)
+    term_function =  TermFunction{typeof(linear_reg_term_value)}(linear_reg_term_value, nbterms, Dims{1}(3))
+    #
+    linear_reg_term_gradient = make_linear_reg_term_gradient(observations)
+    term_gradient = TermGradient{typeof(linear_reg_term_gradient)}(linear_reg_term_gradient ,nbterms, Dims{1}(3))
+    evaluator = Evaluator{typeof(linear_reg_term_value),typeof(linear_reg_term_gradient)}(term_function,term_gradient)
+    #
     svrg_pb = SVRG(100, 0.2)
     # solve.
     nb_iter = 60
