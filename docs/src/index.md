@@ -27,8 +27,8 @@ get_nbterms
 ## Examples
 
 ```@docs
-logistic_term_value
-logistic_term_gradient
-linear_reg_term_value
-linear_reg_term_gradient
+make_logistic_term_value
+make_logistic_term_gradient
+make_linear_reg_term_value
+make_linear_reg_term_gradient
 ```
