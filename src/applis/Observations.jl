@@ -11,7 +11,7 @@
 For regressions problems for example length(datas) is number of observations.
     and length(datas[1]) is 1+dimension of observations data beccause of interception terms.
 """
-mutable struct Observations 
+struct Observations 
     datas :: Vector{Vector{Float64}}
     value_at_data :: Vector{Float64}
     #

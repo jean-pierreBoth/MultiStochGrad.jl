@@ -15,10 +15,13 @@ include("Observations.jl")
 
 # We have to implement 
 # (observations: Observations, position: Array{Float64}, term : Int64) -> Float64
+
 """
 # function make_linear_reg_term_value(observations:: Observations)
 
-return a closure function linear\\_reg\\_term\\_value(position:: Array{Float64}, term :: Int64)
+return a closure : 
+ 
+    function linear\\_reg\\_term\\_value(position:: Array{Float64}, term :: Int64)
 
 ```math
 term value = 1/2 * (y -  observation[term] \\cdot position)^2
@@ -41,7 +44,9 @@ end
 """
 # function make_linear_reg_term_gradient(observations::Observations)
  
-returns a closure: function linear\\_reg\\_term\\_gradient(position::Array{Float64,1}, term::Int64, gradient::Array{Float64,1})
+returns a closure:  
+
+    function linear\\_reg\\_term\\_gradient(position::Array{Float64,1}, term::Int64, gradient::Array{Float64,1})
 
 just take the gradient of the expression for linear\\_reg\\_term\\_value
 """
