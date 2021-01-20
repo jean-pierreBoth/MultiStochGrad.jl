@@ -47,9 +47,10 @@ We compare below the performance of the Rust and the Julia versions.
 
 Small tests consist in a line fitting problem and logisitc regression.
 
-The logistic regression test and example run on the digits MNIST, as in the second paper on SCSG.
+The logistic regression test and example run on the training files of the digits MNIST database, as in the second paper on SCSG.
 
-The data files can be downloaded from [MNIST](http://yann.lecun.com/exdb/mnist).
+The data files can be downloaded from [MNIST](http://yann.lecun.com/exdb/mnist), then modify accordingly the paths
+declared in file TestLogisiticRegression.jl.
 
 The database has 60000 images of 784 pixels corresponding to
 handwritten digits form 0 to 9.  
