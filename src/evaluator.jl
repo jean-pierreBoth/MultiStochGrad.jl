@@ -8,7 +8,10 @@
 """
 # TermFunction{F}  with F<: Function
 
-A structure grouping observations and an evaluation function
+This structure stores a function that compute a term of serie representing the objective function given 
+the position and the term of the serie to evaluate.  
+
+This **eval** function can be a closure caching observations data (see regressions examples)
 
 ## Fields
 
@@ -95,7 +98,11 @@ end
 """
 # struct TermGradient{G}  with G <: Function
 
-This structure is the building block for all gradient computations
+This structure is the building block for all gradient computations.  
+It stores a **eval** function that computes the gradient of term of serie representing the objective function given 
+the position and the term of the serie to evaluate.  
+
+This function **eval** can be a closure caching observations data (see regressions examples)
 
 ## Fields
 
@@ -111,7 +118,7 @@ This structure is the building block for all gradient computations
 - dims : characterize the dimensions on variable for which we do a minimization
 
 """
-mutable struct TermGradient{G<:Function}
+struct TermGradient{G<:Function}
     eval :: G
     nbterms :: Int64
     dim :: Dims
@@ -144,7 +151,7 @@ end
 
 This function computes a gradient Array at a given position summing over all terms passed as arg.
 
-NOTA: It must be noted that this function computes the mean of gradients returned by the termg function returned on each term.
+NOTA: This function computes the mean of gradients returned by the termg function returned on each term.
 So that the gradient computed on a batch is an estimator of the gradient computed on the whole objective function.
 
 It is multithreaded and computes gradient by blocks of 1500 terms.
@@ -207,7 +214,7 @@ end
 It is associated to various functions dispatching computations to it.
 
 """
-mutable struct Evaluator{F,G}
+struct Evaluator{F,G}
     #  A vector of observation , associated value
     compute_term_value :: TermFunction{F}
     compute_term_gradient :: TermGradient{G}

@@ -7,11 +7,11 @@ using LinearAlgebra
 # We have to implement 
 # (observations: Observations, position: Array{Float64}, term : Int64) -> Float64
 """
-# function make_logistic_term_value(observations:: Observations)
+# function make\\_logistic\\_term\\_value(observations:: Observations)
 
 retuns a closure :  
 
-function logistic_term_value(position:: Array{Float64}, term :: Int64)
+    function logistic_term_value(position:: Array{Float64}, term :: Int64)
 
 Our position data x is encoded in an Array{Float64,2} of size (1 + length of an observation, nbclass_1).
 
@@ -46,11 +46,11 @@ end
 
 
 """
-# function make_logistic_term_gradient(observations:: Observations)
+# function make\\_logistic\\_term\\_gradient(observations:: Observations)
 
  returns a closure :  
 
-    function logistic\\_term\\_gradient(position:: Array{Float64,2}, term :: Int64, gradient ::  Array{Float64,2})
+    function logistic_term_gradient(position:: Array{Float64,2}, term :: Int64, gradient ::  Array{Float64,2})
 
 The gradient of term i is given by the array dependant on column index k, and line index j:
 ```math

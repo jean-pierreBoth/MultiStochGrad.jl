@@ -27,7 +27,7 @@ and updating position by combining these global and local gradients.
 
 ## Structure of the package and documentation
 
-The user API relies mainly upon two structures defining the optimization problem (detailed in file **evaluator.jl**) specifying how to compute each value and gradient of each term of the sum at a given position:
+The user API relies mainly upon two structures defining the optimization problem (detailed in file **evaluator.jl**) specifying how to compute the value and gradient of each term of the sum at a given position:
 
     - struct TermFunction{F <: Function}
 
@@ -35,21 +35,22 @@ The user API relies mainly upon two structures defining the optimization problem
 
 The directory src/applis show examples of definitions of these 2 structures.  
 
-These two structures are grouped into a **struct Evaluator{F,G}** which can do value and gradient computations needed during the iterations.  
+These two structures are grouped into a **struct Evaluator{F,G}** which can thus do all value and gradient computations needed during the iterations.  
 Each algorithm SVRG or SCSG is described by its own structure and has its specific parameters and iteration strategy.
 A minimize function taking as arguments a structure SCSG or SVRG, an evaluator structure, the maximum number of iterations and an initial position then returns the minimum value obtained and its correspond position.
+ 
+Further documentation can be found in docs of the Julia package (run **julia make.jl**), some more in the doc of the equivalent Rust crate [multistochgrad.rs](https://github.com/jean-pierreBoth/multistochgrad) and in the reference papers.
 
-Doc is generated as usual by running julia make.jl in the docs/src directory.  
-
-Further documentation can be found in docs of the Julia package, more in the doc of the Rust crate and at last in the reference papers.
+We compare below the performance of the Rust and the Julia versions.
 
 ## Examples and tests
 
 Small tests consist in a line fitting problem and logisitc regression.
 
-Examples are based on logisitc regression applied to digits MNIST database
-(as in the second paper on SCSG).  
+The logistic regression test and example run on the digits MNIST, as in the second paper on SCSG.
+
 The data files can be downloaded from [MNIST](http://yann.lecun.com/exdb/mnist).
+
 The database has 60000 images of 784 pixels corresponding to
 handwritten digits form 0 to 9.  
 The logistic regression, with 10 classes,  is tested with the 2 algorithms and some comments are provided, comparing the results.
