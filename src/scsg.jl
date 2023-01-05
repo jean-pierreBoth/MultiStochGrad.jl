@@ -157,7 +157,7 @@ end
 
 
 """
-# function minimize(scsgpb::SCSG, evaluation::Evaluator{F,G}, max_iter::Int64, initialposition::Array{Float64,N})
+    minimize(scsgpb::SCSG, evaluation::Evaluator{F,G}, max_iter::Int64, initialposition::Array{Float64,N})
 
 Generic function used in minimisations for all algorithms.  
     

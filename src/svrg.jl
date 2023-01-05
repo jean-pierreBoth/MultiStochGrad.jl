@@ -40,7 +40,7 @@ end
 
 
 """
-# function minimize(svrgpb::SVRG, evaluation::Evaluator{F,G}, max_iter::Int64, initialposition::Array{Float64,N})
+    minimize(svrgpb::SVRG, evaluation::Evaluator{F,G}, max_iter::Int64, initialposition::Array{Float64,N})
 
 Generic function used in minimisations for all algorithms.  
     
@@ -53,7 +53,7 @@ The function has 3 type parameters F, G and N:
 (See Logistic regression where we used N=2)
 
 
-## Args
+# Args
 - svrgpb : the structure describing main parameters of the batch strategy
 - Evaluator{F,G}
 - max_iter : maximum number of iterations
